@@ -1,0 +1,70 @@
+{
+  "app": {
+    "name": "IP-SAKTI",
+    "fullName": "IP-SAKTI Sahayak",
+    "tagline": "Intellectual property research assistant"
+  },
+  "nav": {
+    "home": "Home",
+    "ask": "Ask Sahayak",
+    "chats": "My Chats",
+    "analysis": "Analysis",
+    "sources": "Sources",
+    "review": "Human Review"
+  },
+  "sidebar": {
+    "navigation": "Primary navigation",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
+  },
+  "header": {
+    "toggleSidebar": "Toggle sidebar",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close menu",
+    "search": "Search",
+    "searchHint": "Search will be available soon",
+    "language": "Change language",
+    "signIn": "Sign in",
+    "account": "Account"
+  },
+  "language": {
+    "label": "Application language",
+    "comingSoon": "More languages coming soon"
+  },
+  "pages": {
+    "home": {
+      "title": "Home",
+      "description": "The IP-SAKTI Sahayak landing experience will introduce the assistant, its evidence-first research approach, and how it supports Ayurveda and intellectual property guidance."
+    },
+    "ask": {
+      "title": "Ask Sahayak",
+      "description": "A jurisdiction-aware research workspace where you can ask intellectual property questions and receive evidence-backed, source-cited answers."
+    },
+    "chats": {
+      "title": "My Chats",
+      "description": "Your saved IP research conversations, associated with your account, will appear here so you can revisit and continue them."
+    },
+    "analysis": {
+      "title": "Analysis",
+      "description": "An overview of your previous research and analysis activity, drawn only from real backend data."
+    },
+    "sources": {
+      "title": "Sources",
+      "description": "The authoritative source library listing the documents and resources Sahayak uses as evidence."
+    },
+    "review": {
+      "title": "Human Review",
+      "description": "Request review of an analysis or conversation from a human intellectual property facilitator."
+    }
+  },
+  "common": {
+    "phaseNote": "Part of an upcoming phase"
+  },
+  "auth": {
+    "signInTitle": "Sign in to IP-SAKTI",
+    "signInSubtitle": "Access your intellectual property research workspace",
+    "signUpTitle": "Create your account",
+    "signUpSubtitle": "Start evidence-first IP research with Sahayak",
+    "backHome": "Back to home"
+  }
+}
