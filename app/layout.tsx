@@ -45,6 +45,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
         <ClerkProvider
+          publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
           signInUrl="/sign-in"
           signUpUrl="/sign-up"
           appearance={{

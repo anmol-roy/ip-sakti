@@ -1,15 +1,92 @@
-# v0 sandbox internal files
+# ───────────────────────────────
+# Dependencies
+# ───────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+/requirement
+# ───────────────────────────────
+# Next.js
+# ───────────────────────────────
+.next/
+out/
+build/
+dist/
+
+# ───────────────────────────────
+# Environment variables
+# ───────────────────────────────
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# ───────────────────────────────
+# Package manager artifacts
+# ───────────────────────────────
+# Uncommit package-lock.json if using pnpm
+package-lock.json
+yarn.lock
+.pnpm-debug.log*
+
+# ───────────────────────────────
+# Logs
+# ───────────────────────────────
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+*.log
+
+# ───────────────────────────────
+# TypeScript
+# ───────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+
+# ───────────────────────────────
+# OS artifacts
+# ───────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ───────────────────────────────
+# Editor / IDE
+# ───────────────────────────────
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ───────────────────────────────
+# Testing
+# ───────────────────────────────
+coverage/
+.nyc_output/
+
+# ───────────────────────────────
+# Vercel / deployment
+# ───────────────────────────────
+.vercel/
+
+# ───────────────────────────────
+# v0 / Sandbox internals
+# ───────────────────────────────
 __v0_runtime_loader.js
 __v0_devtools.tsx
 __v0_jsx-dev-runtime.ts
 .snowflake/
 .v0-trash/
-.vercel/
 
-# Environment variables
-.env*.local
-
-# Common ignores
-node_modules
-.next/
-.DS_Store
+# ───────────────────────────────
+# Misc
+# ───────────────────────────────
+*.pem
+.cache/
