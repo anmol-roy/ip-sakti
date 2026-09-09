@@ -1,15 +1,15 @@
 'use client'
 
-import { FileText, Leaf, Beaker, Shield, Scale, Globe } from 'lucide-react'
+import { FileText, Leaf, Beaker, Shield, Scale, Globe, type LucideIcon } from 'lucide-react'
 import { useI18n } from '@/components/providers/i18n-provider'
 
-const items = [
-  { icon: <FileText className="size-5" />,  tk: 'patentTitle',      bk: 'patentBody' },
-  { icon: <Leaf className="size-5" />,       tk: 'tkTitle',          bk: 'tkBody' },
-  { icon: <Beaker className="size-5" />,     tk: 'formulationTitle', bk: 'formulationBody' },
-  { icon: <Shield className="size-5" />,     tk: 'absTitle',         bk: 'absBody' },
-  { icon: <Scale className="size-5" />,      tk: 'lawTitle',         bk: 'lawBody' },
-  { icon: <Globe className="size-5" />,      tk: 'multiTitle',       bk: 'multiBody' },
+const items: { Icon: LucideIcon; tk: string; bk: string }[] = [
+  { Icon: FileText,  tk: 'patentTitle',      bk: 'patentBody' },
+  { Icon: Leaf,      tk: 'tkTitle',          bk: 'tkBody' },
+  { Icon: Beaker,    tk: 'formulationTitle', bk: 'formulationBody' },
+  { Icon: Shield,    tk: 'absTitle',         bk: 'absBody' },
+  { Icon: Scale,     tk: 'lawTitle',         bk: 'lawBody' },
+  { Icon: Globe,     tk: 'multiTitle',       bk: 'multiBody' },
 ]
 
 export function CapabilitiesSection() {
@@ -24,13 +24,13 @@ export function CapabilitiesSection() {
           </h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map(({ icon, tk, bk }) => (
+          {items.map(({ Icon, tk, bk }) => (
             <div
               key={tk}
               className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
             >
               <div className="mb-3 flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                {icon}
+                <Icon className="size-5" aria-hidden />
               </div>
               <h3 className="mb-1 text-sm font-semibold text-foreground">{t(`home.capabilities.${tk}`)}</h3>
               <p className="text-xs leading-relaxed text-muted-foreground">{t(`home.capabilities.${bk}`)}</p>

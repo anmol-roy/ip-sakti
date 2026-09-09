@@ -18,28 +18,31 @@ import {
   ShieldCheck,
   Sprout,
   Users,
+  type LucideIcon,
 } from 'lucide-react'
 import { useI18n } from '@/components/providers/i18n-provider'
 import { Button } from '@/components/ui/button'
 
-const DOMAIN_CARDS = [
-  { icon: FileText,     tk: 'patents' },
-  { icon: Leaf,         tk: 'tk' },
-  { icon: FlaskConical, tk: 'formulations' },
-  { icon: Sprout,       tk: 'abs' },
-  { icon: Scale,        tk: 'laws' },
-] as const
+interface DomainCard { Icon: LucideIcon; tk: string }
+const DOMAIN_CARDS: DomainCard[] = [
+  { Icon: FileText,     tk: 'patents' },
+  { Icon: Leaf,         tk: 'tk' },
+  { Icon: FlaskConical, tk: 'formulations' },
+  { Icon: Sprout,       tk: 'abs' },
+  { Icon: Scale,        tk: 'laws' },
+]
 
-const TRUST_ITEMS = [
-  { icon: FileCheck2,  pk: 'pillSource',   dk: 'source' },
-  { icon: ShieldCheck, pk: 'pillEvidence', dk: 'evidence' },
-  { icon: Users,       pk: 'pillReview',   dk: 'review' },
-] as const
+interface TrustItem { Icon: LucideIcon; pk: string; dk: string }
+const TRUST_ITEMS: TrustItem[] = [
+  { Icon: FileCheck2,  pk: 'pillSource',   dk: 'source' },
+  { Icon: ShieldCheck, pk: 'pillEvidence', dk: 'evidence' },
+  { Icon: Users,       pk: 'pillReview',   dk: 'review' },
+]
 
-const DECOR_DOMAINS = ['domain1', 'domain2', 'domain3', 'domain4', 'domain5'] as const
+const DECOR_DOMAINS  = ['domain1', 'domain2', 'domain3', 'domain4', 'domain5'] as const
 const PANEL_EXAMPLES = ['ex1', 'ex2', 'ex3', 'ex4'] as const
 const EVIDENCE_STEPS = ['question', 'research', 'evidence', 'answer'] as const
-const STATEMENTS = ['statement1', 'statement2', 'statement3'] as const
+const STATEMENTS     = ['statement1', 'statement2', 'statement3'] as const
 
 export function HeroSection() {
   const { t } = useI18n()
@@ -47,7 +50,7 @@ export function HeroSection() {
   return (
     <section className="relative min-h-[640px] overflow-hidden border-b border-border bg-background">
 
-      {/* ── FULL-WIDTH BACKGROUND IMAGE (right half) ───────── */}
+      {/* full-width background image */}
       <div aria-hidden className="absolute inset-0 z-0">
         <Image
           src="/image/hero/hero-research-bg.png"
@@ -57,17 +60,15 @@ export function HeroSection() {
           sizes="100vw"
           className="object-cover object-[72%_center]"
         />
-        {/* fade left so copy area is clean */}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/10" />
-        {/* fade bottom */}
         <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
       </div>
 
-      {/* ── MAIN CONTENT ───────────────────────────────────── */}
+      {/* main content */}
       <div className="relative z-10 mx-auto max-w-[1400px] px-6 py-14 md:px-10 md:py-20 xl:px-16">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[480px_1fr] lg:gap-0 xl:grid-cols-[520px_1fr]">
 
-          {/* ── LEFT: COPY ─────────────────────────────────── */}
+          {/* LEFT — copy */}
           <div className="flex flex-col gap-6 lg:py-4">
 
             {/* eyebrow */}
@@ -92,30 +93,30 @@ export function HeroSection() {
 
             {/* CTAs */}
             <div className="flex flex-wrap items-center gap-3">
-              <Button asChild size="lg" className="group h-12 gap-2 rounded-full px-7 text-sm font-semibold">
-                <Link href="/ask">
-                  <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
-                  {t('home.hero.ctaAsk')}
-                </Link>
+              <Button
+                render={<Link href="/ask" />}
+                size="lg"
+                className="group h-12 gap-2 rounded-full px-7 text-sm font-semibold"
+              >
+                <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />
+                {t('home.hero.ctaAsk')}
               </Button>
               <Button
-                asChild
+                render={<a href="#how-it-works" />}
                 variant="outline"
                 size="lg"
                 className="h-12 gap-2 rounded-full px-7 text-sm font-semibold"
               >
-                <a href="#how-it-works">
-                  <span className="flex size-5 items-center justify-center rounded-full border border-current">
-                    <ChevronDown className="size-3" />
-                  </span>
-                  {t('home.hero.ctaHow')}
-                </a>
+                <span className="flex size-5 items-center justify-center rounded-full border border-current" aria-hidden>
+                  <ChevronDown className="size-3" />
+                </span>
+                {t('home.hero.ctaHow')}
               </Button>
             </div>
 
             {/* trust badges */}
             <div className="grid grid-cols-3 gap-4 pt-2">
-              {TRUST_ITEMS.map(({ icon: Icon, pk, dk }) => (
+              {TRUST_ITEMS.map(({ Icon, pk, dk }) => (
                 <div key={pk} className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2">
                     <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-border bg-background/80 text-primary shadow-sm">
@@ -139,10 +140,10 @@ export function HeroSection() {
             </p>
           </div>
 
-          {/* ── RIGHT: FLOATING UI ─────────────────────────── */}
+          {/* RIGHT — floating UI */}
           <div className="relative flex items-start justify-end">
 
-            {/* top-right domain labels (decorative) */}
+            {/* top-right domain labels */}
             <div aria-hidden className="absolute right-0 top-0 hidden flex-col items-end gap-1 lg:flex">
               {DECOR_DOMAINS.map((key, i) => (
                 <span
@@ -166,7 +167,7 @@ export function HeroSection() {
                 className="relative z-10 hidden flex-col gap-2.5 md:flex"
                 style={{ transform: 'rotate(-3deg) translateX(28px)', transformOrigin: 'top right' }}
               >
-                {DOMAIN_CARDS.map(({ icon: Icon, tk }, i) => (
+                {DOMAIN_CARDS.map(({ Icon, tk }, i) => (
                   <div
                     key={tk}
                     style={{ transform: `translateX(${i % 2 === 0 ? '0px' : '8px'})` }}
@@ -186,7 +187,7 @@ export function HeroSection() {
                   </div>
                 ))}
 
-                {/* connector SVG from last card into panel */}
+                {/* connector SVG */}
                 <svg
                   aria-hidden
                   className="absolute -right-7 bottom-10 overflow-visible"
@@ -212,7 +213,7 @@ export function HeroSection() {
                 className="relative z-20 w-full max-w-[360px] rounded-2xl border border-border bg-card/97 shadow-2xl shadow-primary/10 backdrop-blur-md xl:max-w-[380px]"
                 style={{ transform: 'rotate(2deg)', transformOrigin: 'top left' }}
               >
-                {/* panel header */}
+                {/* header */}
                 <div className="flex items-center justify-between rounded-t-2xl border-b border-border bg-card px-5 py-3.5">
                   <div className="flex items-center gap-2">
                     <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
@@ -239,7 +240,7 @@ export function HeroSection() {
                       <span className="flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-xs font-medium text-foreground">
                         <MapPin className="size-3" aria-hidden />
                         {t('home.hero.panel.region')}
-                        <ChevronDown className="size-3 opacity-50" />
+                        <ChevronDown className="size-3 opacity-50" aria-hidden />
                       </span>
                     </div>
                     <span className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
@@ -272,10 +273,8 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* ── BOTTOM: evidence chain + statement ────────────── */}
+        {/* bottom: evidence chain + statement */}
         <div className="relative z-10 mt-10 flex flex-col items-start gap-4 border-t border-border/40 pt-5 lg:flex-row lg:items-center lg:justify-between">
-
-          {/* evidence steps */}
           <div className="flex flex-wrap items-center gap-2">
             {EVIDENCE_STEPS.map((step, i) => (
               <Fragment key={step}>
@@ -294,7 +293,6 @@ export function HeroSection() {
             ))}
           </div>
 
-          {/* bottom statement */}
           <div aria-hidden className="flex items-center gap-3">
             {STATEMENTS.map((key, i) => (
               <Fragment key={key}>
@@ -305,7 +303,6 @@ export function HeroSection() {
               </Fragment>
             ))}
           </div>
-
         </div>
       </div>
     </section>
