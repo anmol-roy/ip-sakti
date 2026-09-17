@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -42,7 +42,7 @@ interface ReviewRequest {
   status?: RequestStatus
 }
 
-export default function ReviewPage() {
+function ReviewPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const chatId = searchParams.get('chatId')
@@ -470,6 +470,23 @@ export default function ReviewPage() {
         </div>
       </div>
     </main>
+  )
+}
+
+export default function ReviewPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-[calc(100vh-56px)] items-center justify-center bg-background">
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <Loader2 className="size-5 animate-spin" />
+            <span className="text-sm">Loading review details...</span>
+          </div>
+        </main>
+      }
+    >
+      <ReviewPageContent />
+    </Suspense>
   )
 }
 
