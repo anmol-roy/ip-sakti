@@ -374,7 +374,6 @@ export default function AskPage() {
     textareaRef.current?.focus()
   }
 
-  const remaining = MAX_CHARS - question.length
   const canSubmit = question.trim().length > 0 && question.length <= MAX_CHARS
 
   const getLanguageName = (code: string) => {
@@ -426,12 +425,18 @@ export default function AskPage() {
           <textarea
             ref={textareaRef}
             value={question}
-            onChange={(e) => setQuestion(e.target.value.slice(0, MAX_CHARS))}
+            onChange={(e) => {
+              const newValue = e.target.value
+              if (newValue.length <= MAX_CHARS) {
+                setQuestion(newValue)
+              }
+            }}
             onKeyDown={handleKeyDown}
             placeholder={t('home.ask.placeholder')}
             rows={4}
             className="w-full resize-none rounded-t-2xl bg-transparent px-4 pt-4 pb-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none sm:px-5 sm:pt-5 sm:text-base"
             aria-label={t('home.ask.placeholder')}
+            maxLength={MAX_CHARS}
           />
 
           {/* Error message */}
@@ -483,13 +488,13 @@ export default function AskPage() {
           )}
 
           {/* toolbar */}
-          <div className="flex flex-col gap-3 px-4 pb-4 pt-1 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
-            <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center justify-between px-4 pb-4 pt-1 gap-2">
+            <div className="flex items-center gap-1.5 flex-1">
               {/* attach */}
               <button
                 type="button"
                 aria-label={t('home.ask.attachLabel')}
-                className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:size-9"
+                className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:size-9 shrink-0"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isProcessingFile}
               >
@@ -506,7 +511,7 @@ export default function AskPage() {
               />
 
               {/* mic with voice controls */}
-              <div className="relative">
+              <div className="relative shrink-0">
                 <button
                   type="button"
                   aria-label={t('home.ask.micLabel')}
@@ -531,7 +536,7 @@ export default function AskPage() {
               </div>
 
               {/* language picker */}
-              <div className="relative">
+              <div className="relative shrink-0">
                 <button
                   type="button"
                   aria-label="Select language"
@@ -570,7 +575,7 @@ export default function AskPage() {
               </div>
 
               {/* jurisdiction dropdown */}
-              <div className="relative">
+              <div className="relative shrink-0">
                 <button
                   type="button"
                   aria-label={t('home.ask.jurisdictionLabel')}
@@ -612,14 +617,7 @@ export default function AskPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-3">
-              <span
-                className={`text-[10px] tabular-nums sm:text-xs ${
-                  remaining < 100 ? 'text-destructive' : 'text-muted-foreground'
-                }`}
-              >
-                {question.length}/{MAX_CHARS}
-              </span>
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={handleSubmit}

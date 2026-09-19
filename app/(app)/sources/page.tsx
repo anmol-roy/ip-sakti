@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { Search, Scale, Leaf, Database, BookOpen, Globe, FileText, ExternalLink, Book } from 'lucide-react'
+import { Search, Scale, Leaf, Database, BookOpen, Globe, FileText, ExternalLink, Book, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -511,11 +511,12 @@ export default function SourcesPage() {
   return (
     <main className="flex min-h-[calc(100vh-56px)] flex-col bg-background">
       {/* Page Header */}
-      <div className="border-b border-border bg-background/95 px-4 py-8 md:px-8">
+      <div className="border-b border-border bg-gradient-to-b from-background to-muted/20 px-4 py-8 md:px-8">
         <div className="mx-auto max-w-4xl">
-          <div className="mb-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-600">
-              KNOWLEDGE LIBRARY
+          <div className="mb-3">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-primary">
+              <Book className="mr-1.5 size-3" />
+              Knowledge Library
             </span>
           </div>
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -527,15 +528,15 @@ export default function SourcesPage() {
                 Explore the laws, guidelines, treaties, databases, and reference documents used by Sahayak to provide source-grounded IP research assistance.
               </p>
             </div>
-            
-            <div className="relative">
+
+            <div className="relative w-full md:w-auto">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search laws, treaties, databases, or documents..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-64 md:w-80"
+                className="pl-10 w-full md:w-80"
                 aria-label="Search resources"
               />
             </div>
@@ -544,7 +545,7 @@ export default function SourcesPage() {
       </div>
 
       {/* Jurisdiction Tabs and Filters */}
-      <div className="border-b border-border bg-muted/30 px-4 py-4 md:px-8">
+      <div className="border-b border-border bg-gradient-to-r from-muted/20 to-muted/10 px-4 py-5 md:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             {/* Jurisdiction Tabs */}
@@ -554,12 +555,13 @@ export default function SourcesPage() {
                   setSelectedJurisdiction('india')
                   setSelectedCategory('All')
                 }}
-                className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
                   selectedJurisdiction === 'india'
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border bg-background text-foreground hover:bg-muted'
+                    ? 'border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/20'
+                    : 'border-border bg-background text-foreground hover:bg-muted hover:border-border/80'
                 }`}
               >
+                <MapPin className="size-4" />
                 India
               </button>
               <button
@@ -567,37 +569,38 @@ export default function SourcesPage() {
                   setSelectedJurisdiction('international')
                   setSelectedCategory('All')
                 }}
-                className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
                   selectedJurisdiction === 'international'
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border bg-background text-foreground hover:bg-muted'
+                    ? 'border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/20'
+                    : 'border-border bg-background text-foreground hover:bg-muted hover:border-border/80'
                 }`}
               >
+                <Globe className="size-4" />
                 International
               </button>
             </div>
 
             {/* Category Filters */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-thin">
               {categories.map((category) => {
-                const count = category === 'All' 
+                const count = category === 'All'
                   ? RESOURCES.filter(r => r.jurisdiction === selectedJurisdiction).length
                   : RESOURCES.filter(r => r.jurisdiction === selectedJurisdiction && r.category === category).length
-                
+
                 if (count === 0 && category !== 'All') return null
 
                 return (
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                    className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition-all sm:px-4 sm:py-2 sm:text-sm ${
                       selectedCategory === category
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-border bg-background text-foreground hover:bg-muted'
+                        ? 'border-primary bg-primary/10 text-primary ring-1 ring-primary/20 shadow-sm'
+                        : 'border-border bg-background text-foreground hover:bg-muted/50 hover:border-border/60'
                     }`}
                   >
                     {category}
-                    <span className="ml-2 text-xs opacity-60">
+                    <span className="ml-1.5 text-[10px] opacity-60 sm:ml-2 sm:text-xs">
                       {count}
                     </span>
                   </button>

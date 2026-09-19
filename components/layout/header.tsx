@@ -4,7 +4,6 @@ import { Menu, PanelLeft } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Brand } from '@/components/layout/brand'
-import { SearchButton } from '@/components/navigation/search-button'
 import { LanguageSelector } from '@/components/navigation/language-selector'
 import { UserProfileButton } from '@/components/auth/user-profile-button'
 import { useI18n } from '@/components/providers/i18n-provider'
@@ -47,9 +46,7 @@ export function Header({
         <Brand showText />
       </div>
 
-      <div className="flex flex-1 justify-center px-1 sm:px-2">
-        <SearchButton />
-      </div>
+      <div className="flex-1" />
 
       <div className="flex items-center gap-1 sm:gap-2">
         <LanguageSelector />
