@@ -12,8 +12,7 @@ import {
   AlertCircle,
   ArrowRight,
   RotateCcw,
-  Shield,
-  Book
+  Shield
 } from 'lucide-react'
 
 const REASONS = [
@@ -179,8 +178,8 @@ function ReviewPageContent() {
     return (
       <main className="flex min-h-[calc(100vh-56px)] items-center justify-center bg-background">
         <div className="flex items-center gap-3 text-muted-foreground">
-          <Loader2 className="size-5 animate-spin" />
-          <span className="text-sm">Loading request details...</span>
+          <Loader2 className="size-4 animate-spin sm:size-5" />
+          <span className="text-xs sm:text-sm">Loading request details...</span>
         </div>
       </main>
     )
@@ -189,37 +188,38 @@ function ReviewPageContent() {
   return (
     <main className="flex min-h-[calc(100vh-56px)] flex-col bg-background">
       {/* Page Header */}
-      <div className="border-b border-border bg-background/95 px-4 py-8 md:px-8">
+      <div className="border-b border-border bg-background/95 px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8">
         <div className="mx-auto max-w-2xl">
-          <div className="mb-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-600">
-              HUMAN REVIEW
+          <div className="mb-1.5 sm:mb-2">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary sm:px-3 sm:py-1 sm:text-xs sm:tracking-[0.25em]">
+              <Shield className="mr-1.5 size-2.5 sm:size-3" />
+              Human Review
             </span>
           </div>
           {pageState === 'form' ? (
             <>
-              <h1 className="text-3xl font-bold text-foreground md:text-4xl">
+              <h1 className="text-xl font-bold text-foreground sm:text-2xl md:text-3xl lg:text-4xl">
                 Need expert assistance?
               </h1>
-              <p className="mt-3 text-base text-muted-foreground">
+              <p className="mt-2 text-xs text-muted-foreground sm:mt-3 sm:text-sm md:text-base">
                 The available evidence may not be sufficient for a reliable answer. You can request review by an IP facilitator.
               </p>
             </>
           ) : pageState === 'success' ? (
             <>
-              <h1 className="text-3xl font-bold text-foreground md:text-4xl">
+              <h1 className="text-xl font-bold text-foreground sm:text-2xl md:text-3xl lg:text-4xl">
                 Review request submitted
               </h1>
-              <p className="mt-3 text-base text-muted-foreground">
+              <p className="mt-2 text-xs text-muted-foreground sm:mt-3 sm:text-sm md:text-base">
                 An IP facilitator will review the available evidence and follow up with guidance.
               </p>
             </>
           ) : (
             <>
-              <h1 className="text-3xl font-bold text-foreground md:text-4xl">
+              <h1 className="text-xl font-bold text-foreground sm:text-2xl md:text-3xl lg:text-4xl">
                 Request review
               </h1>
-              <p className="mt-3 text-base text-muted-foreground">
+              <p className="mt-2 text-xs text-muted-foreground sm:mt-3 sm:text-sm md:text-base">
                 Submit your request for expert IP facilitator review.
               </p>
             </>
@@ -228,21 +228,21 @@ function ReviewPageContent() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-4 py-8 md:px-8">
+      <div className="flex-1 px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8">
         <div className="mx-auto max-w-2xl">
           {/* Form State */}
           {pageState === 'form' && (
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm md:p-8">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6 md:p-8">
               {/* Reason */}
-              <div className="mb-6">
-                <label htmlFor="reason" className="mb-2 block text-sm font-medium text-foreground">
+              <div className="mb-4 sm:mb-6">
+                <label htmlFor="reason" className="mb-1.5 block text-xs font-medium text-foreground sm:mb-2 sm:text-sm">
                   Reason
                 </label>
                 <select
                   id="reason"
                   value={request.reason}
                   onChange={(e) => setRequest(prev => ({ ...prev, reason: e.target.value }))}
-                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 sm:px-4 sm:py-3 sm:text-sm"
                 >
                   {REASONS.map(reason => (
                     <option key={reason} value={reason}>{reason}</option>
@@ -251,8 +251,8 @@ function ReviewPageContent() {
               </div>
 
               {/* Question */}
-              <div className="mb-6">
-                <label htmlFor="question" className="mb-2 block text-sm font-medium text-foreground">
+              <div className="mb-4 sm:mb-6">
+                <label htmlFor="question" className="mb-1.5 block text-xs font-medium text-foreground sm:mb-2 sm:text-sm">
                   Question
                 </label>
                 <Textarea
@@ -260,76 +260,76 @@ function ReviewPageContent() {
                   placeholder="Please describe what you would like the IP facilitator to review."
                   value={request.question}
                   onChange={(e) => setRequest(prev => ({ ...prev, question: e.target.value }))}
-                  rows={4}
-                  className="resize-none"
+                  rows={3}
+                  className="resize-none text-xs sm:rows-4 sm:text-sm"
                 />
                 {validationErrors.question && (
-                  <p className="mt-1 text-xs text-destructive">{validationErrors.question}</p>
+                  <p className="mt-1 text-[10px] text-destructive sm:text-xs">{validationErrors.question}</p>
                 )}
               </div>
 
               {/* Linked Analysis */}
-              <div className="mb-6">
-                <label className="mb-2 block text-sm font-medium text-foreground">
+              <div className="mb-4 sm:mb-6">
+                <label className="mb-1.5 block text-xs font-medium text-foreground sm:mb-2 sm:text-sm">
                   Relevant analysis
                 </label>
                 {linkedAnalysis ? (
-                  <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <FileText className="size-5 text-muted-foreground" />
+                  <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2 sm:px-4 sm:py-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <FileText className="size-4 text-muted-foreground sm:size-5" />
                       <div>
-                        <p className="text-sm font-medium text-foreground">{linkedAnalysis.title}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs font-medium text-foreground sm:text-sm">{linkedAnalysis.title}</p>
+                        <p className="text-[10px] text-muted-foreground sm:text-xs">
                           {linkedAnalysis.type} · {linkedAnalysis.jurisdiction}
                         </p>
                       </div>
                     </div>
-                    <div className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary">
-                      <Check className="size-3" />
+                    <div className="flex size-5 items-center justify-center rounded-full bg-primary/10 text-primary sm:size-6">
+                      <Check className="size-2.5 sm:size-3" />
                     </div>
                   </div>
                 ) : (
-                  <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+                  <div className="rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground sm:px-4 sm:py-3 sm:text-sm">
                     No analysis selected
                   </div>
                 )}
               </div>
 
               {/* Consent */}
-              <div className="mb-6">
-                <label className="flex items-start gap-3 cursor-pointer">
+              <div className="mb-4 sm:mb-6">
+                <label className="flex items-start gap-2 cursor-pointer sm:gap-3">
                   <input
                     type="checkbox"
                     checked={request.consent}
                     onChange={(e) => setRequest(prev => ({ ...prev, consent: e.target.checked }))}
-                    className="mt-1 size-4 rounded border-border bg-background text-primary focus:ring-2 focus:ring-primary/20"
+                    className="mt-0.5 size-3.5 rounded border-border bg-background text-primary focus:ring-2 focus:ring-primary/20 sm:mt-1 sm:size-4"
                   />
-                  <span className="text-sm text-foreground">
+                  <span className="text-[11px] leading-relaxed text-foreground sm:text-sm">
                     I understand that this request is for informational review and does not create an advocate-client relationship.
                   </span>
                 </label>
                 {validationErrors.consent && (
-                  <p className="mt-1 text-xs text-destructive">{validationErrors.consent}</p>
+                  <p className="mt-1 text-[10px] text-destructive sm:text-xs">{validationErrors.consent}</p>
                 )}
               </div>
 
               {/* Submit Error */}
               {submitError && (
-                <div className="mb-6 flex items-center gap-2 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                  <AlertCircle className="size-4" />
-                  <span>{submitError}</span>
+                <div className="mb-4 flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive sm:mb-6 sm:px-4 sm:py-3 sm:text-sm">
+                  <AlertCircle className="size-3.5 sm:size-4" />
+                  <span className="text-[10px] sm:text-xs">{submitError}</span>
                 </div>
               )}
 
               {/* Submit Button */}
               <Button
                 onClick={handleSubmit}
-                className="w-full gap-2"
+                className="w-full gap-2 text-xs sm:text-sm"
                 size="lg"
               >
                 <>
                   Submit for Review
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-3.5 sm:size-4" />
                 </>
               </Button>
             </div>
@@ -337,42 +337,42 @@ function ReviewPageContent() {
 
           {/* Success State */}
           {pageState === 'success' && (
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm md:p-8">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6 md:p-8">
               {/* Success Icon */}
-              <div className="mb-6 flex justify-center">
-                <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
-                  <Check className="size-8 text-primary" />
+              <div className="mb-4 flex justify-center sm:mb-6">
+                <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 sm:size-16">
+                  <Check className="size-6 text-primary sm:size-8" />
                 </div>
               </div>
 
               {/* Confirmation Heading */}
-              <h2 className="mb-6 text-center text-2xl font-semibold text-foreground">
+              <h2 className="mb-4 text-center text-lg font-semibold text-foreground sm:mb-6 sm:text-xl md:text-2xl">
                 Review request submitted
               </h2>
 
               {/* Request Details */}
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {/* Request ID */}
-                <div className="flex items-center justify-between border-b border-border/50 pb-3">
-                  <span className="text-sm text-muted-foreground">Request ID</span>
-                  <span className="text-sm font-medium text-foreground">
+                <div className="flex items-center justify-between border-b border-border/50 pb-2 sm:pb-3">
+                  <span className="text-xs text-muted-foreground sm:text-sm">Request ID</span>
+                  <span className="text-xs font-medium text-foreground sm:text-sm">
                     {request.id || 'IPF-2026-0827-041'}
                   </span>
                 </div>
 
                 {/* Status */}
-                <div className="flex items-center justify-between border-b border-border/50 pb-3">
-                  <span className="text-sm text-muted-foreground">Status</span>
-                  <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                <div className="flex items-center justify-between border-b border-border/50 pb-2 sm:pb-3">
+                  <span className="text-xs text-muted-foreground sm:text-sm">Status</span>
+                  <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary sm:px-3 sm:py-1 sm:text-xs">
                     {request.status || 'Pending review'}
                   </span>
                 </div>
 
                 {/* Submitted Date */}
                 {request.submittedAt && (
-                  <div className="flex items-center justify-between border-b border-border/50 pb-3">
-                    <span className="text-sm text-muted-foreground">Submitted</span>
-                    <span className="text-sm text-foreground">
+                  <div className="flex items-center justify-between border-b border-border/50 pb-2 sm:pb-3">
+                    <span className="text-xs text-muted-foreground sm:text-sm">Submitted</span>
+                    <span className="text-xs text-foreground sm:text-sm">
                       {request.submittedAt.toLocaleDateString('en-GB', {
                         day: '2-digit',
                         month: 'short',
@@ -385,27 +385,29 @@ function ReviewPageContent() {
                 )}
 
                 {/* Reason */}
-                <div className="flex items-start justify-between border-b border-border/50 pb-3">
-                  <span className="text-sm text-muted-foreground">Reason</span>
-                  <span className="max-w-[60%] text-right text-sm text-foreground">
+                <div className="flex items-start justify-between border-b border-border/50 pb-2 sm:pb-3">
+                  <span className="text-xs text-muted-foreground sm:text-sm">Reason</span>
+                  <span className="max-w-[60%] text-right text-xs text-foreground sm:text-sm">
                     {request.reason}
                   </span>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <div className="mt-6 flex flex-col gap-2 sm:mt-8 sm:gap-3 sm:flex-row sm:justify-center">
                 <Button
                   variant="outline"
                   onClick={handleReturnToChat}
-                  className="flex-1 sm:flex-none"
+                  className="flex-1 text-xs sm:flex-none sm:text-sm"
+                  size="sm"
                 >
                   Return to chat
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => router.push('/ask')}
-                  className="flex-1 sm:flex-none"
+                  className="flex-1 text-xs sm:flex-none sm:text-sm"
+                  size="sm"
                 >
                   Go to Ask Sahayak
                 </Button>
@@ -415,32 +417,35 @@ function ReviewPageContent() {
 
           {/* Error State */}
           {pageState === 'error' && (
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm md:p-8">
-              <div className="mb-6 flex justify-center">
-                <div className="flex size-16 items-center justify-center rounded-full bg-destructive/10">
-                  <AlertCircle className="size-8 text-destructive" />
+            <div className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6 md:p-8">
+              <div className="mb-4 flex justify-center sm:mb-6">
+                <div className="flex size-12 items-center justify-center rounded-full bg-destructive/10 sm:size-16">
+                  <AlertCircle className="size-6 text-destructive sm:size-8" />
                 </div>
               </div>
 
-              <h2 className="mb-2 text-center text-xl font-semibold text-foreground">
+              <h2 className="mb-2 text-center text-base font-semibold text-foreground sm:text-lg md:text-xl">
                 Unable to submit request
               </h2>
-              <p className="mb-6 text-center text-sm text-muted-foreground">
+              <p className="mb-4 text-center text-xs text-muted-foreground sm:mb-6 sm:text-sm">
                 {submitError || 'We could not submit your review request. Please try again.'}
               </p>
 
-              <div className="flex justify-center gap-3">
+              <div className="flex justify-center gap-2 sm:gap-3">
                 <Button
                   variant="outline"
                   onClick={handleRetry}
-                  className="gap-2"
+                  className="gap-2 text-xs sm:text-sm"
+                  size="sm"
                 >
-                  <RotateCcw className="size-4" />
+                  <RotateCcw className="size-3.5 sm:size-4" />
                   Retry
                 </Button>
                 <Button
                   variant="outline"
                   onClick={handleReturnToChat}
+                  className="text-xs sm:text-sm"
+                  size="sm"
                 >
                   Return to chat
                 </Button>
@@ -451,11 +456,11 @@ function ReviewPageContent() {
       </div>
 
       {/* Footer Disclaimer */}
-      <div className="border-t border-border/40 px-4 py-6 md:px-8">
+      <div className="border-t border-border/40 px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-6">
         <div className="mx-auto max-w-2xl">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
-            <Shield className="size-4" />
-            <span>
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground/70 sm:text-xs">
+            <Shield className="size-3 sm:size-4" />
+            <span className="leading-relaxed">
               Information provided by Anvashai is for general informational purposes only and does not constitute legal advice.
             </span>
           </div>
@@ -471,8 +476,8 @@ export default function ReviewPage() {
       fallback={
         <main className="flex min-h-[calc(100vh-56px)] items-center justify-center bg-background">
           <div className="flex items-center gap-3 text-muted-foreground">
-            <Loader2 className="size-5 animate-spin" />
-            <span className="text-sm">Loading review details...</span>
+            <Loader2 className="size-4 animate-spin sm:size-5" />
+            <span className="text-xs sm:text-sm">Loading review details...</span>
           </div>
         </main>
       }
