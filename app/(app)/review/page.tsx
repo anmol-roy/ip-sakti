@@ -464,7 +464,7 @@ function ReviewPageContent() {
           <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
             <Shield className="size-4" />
             <span>
-              Information provided by IP-SAKTI Sahayak is for general informational purposes only and does not constitute legal advice.
+              Information provided by Anvashai is for general informational purposes only and does not constitute legal advice.
             </span>
           </div>
         </div>

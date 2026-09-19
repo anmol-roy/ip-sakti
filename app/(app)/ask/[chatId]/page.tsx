@@ -443,7 +443,7 @@ export default function ChatPage() {
       setListenState('playing')
     } else {
       // Start speaking - read the complete answer
-      const textToRead = `${response.preliminaryFinding}. ${response.explanation}. Relevant areas: ${response.relevantAreas.join(', ')}. Evidence confidence: ${response.confidence}. IP-SAKTI Sahayak provides source-grounded informational assistance and does not constitute legal advice.`
+      const textToRead = `${response.preliminaryFinding}. ${response.explanation}. Relevant areas: ${response.relevantAreas.join(', ')}. Evidence confidence: ${response.confidence}. Anvashai provides source-grounded informational assistance and does not constitute legal advice.`
       const utterance = new SpeechSynthesisUtterance(textToRead)
       utterance.lang = LANGUAGES.find(l => l.code === selectedLanguage)?.speechCode || 'en-US'
       utterance.rate = 0.9
@@ -462,7 +462,7 @@ export default function ChatPage() {
   }, [])
 
   const copyResponse = useCallback((response: AIResponse) => {
-    const textToCopy = `${response.preliminaryFinding}\n\n${response.explanation}\n\nRelevant areas: ${response.relevantAreas.join(', ')}\n\nEvidence used:\n${response.evidence.map(e => `- ${e.title}`).join('\n')}\n\nEvidence confidence: ${response.confidence}\n\nIP-SAKTI Sahayak provides source-grounded informational assistance and does not constitute legal advice.`
+    const textToCopy = `${response.preliminaryFinding}\n\n${response.explanation}\n\nRelevant areas: ${response.relevantAreas.join(', ')}\n\nEvidence used:\n${response.evidence.map(e => `- ${e.title}`).join('\n')}\n\nEvidence confidence: ${response.confidence}\n\nAnvashai provides source-grounded informational assistance and does not constitute legal advice.`
     
     navigator.clipboard.writeText(textToCopy).then(() => {
       setCopied(true)
@@ -1059,7 +1059,7 @@ export default function ChatPage() {
         {/* Disclaimer */}
         <div className="mt-8 border-t border-border/40 pt-4">
           <p className="text-[11px] text-muted-foreground/60">
-            IP-SAKTI Sahayak provides source-grounded informational assistance and does not constitute legal advice.
+            Anvashai provides source-grounded informational assistance and does not constitute legal advice.
           </p>
         </div>
       </div>

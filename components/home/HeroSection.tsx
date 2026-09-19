@@ -141,136 +141,143 @@ export function HeroSection() {
           </div>
 
           {/* RIGHT — floating UI */}
-          <div className="relative flex items-start justify-end">
+<div className="relative flex items-start justify-end">
 
-            {/* top-right domain labels */}
-            <div aria-hidden className="absolute right-0 top-0 hidden flex-col items-end gap-1 lg:flex">
-              {DECOR_DOMAINS.map((key, i) => (
-                <span
-                  key={key}
-                  className={`text-[10px] font-medium uppercase tracking-[0.28em] ${
-                    i === 4
-                      ? 'text-foreground/80 underline decoration-amber-500 decoration-[1.5px] underline-offset-3'
-                      : 'text-muted-foreground/50'
-                  }`}
-                >
-                  {t(`home.hero.decor.${key}`)}
-                </span>
-              ))}
-            </div>
+  {/* top-right domain labels */}
+  {/* <div aria-hidden className="absolute right-0 top-0 hidden flex-col items-end gap-1 lg:flex">
+    {DECOR_DOMAINS.map((key, i) => (
+      <span
+        key={key}
+        className={`text-[10px] font-medium uppercase tracking-[0.28em] ${
+          i === 4
+            ? 'text-foreground/80 underline decoration-amber-500 decoration-[1.5px] underline-offset-3'
+            : 'text-muted-foreground/50'
+        }`}
+      >
+        {t(`home.hero.decor.${key}`)}
+      </span>
+    ))}
+  </div> */}
 
-            {/* domain cards + panel — tilted & connected */}
-            <div className="relative flex w-full max-w-[720px] items-center justify-end pt-8 lg:pt-4">
+  {/* domain cards + panel — tilted & connected */}
+  <div className="relative flex w-full max-w-[720px] items-center justify-end pt-8 lg:pt-4">
 
-              {/* domain card column — tilted left */}
-              <div
-                className="relative z-10 hidden flex-col gap-2.5 md:flex"
-                style={{ transform: 'rotate(-3deg) translateX(28px)', transformOrigin: 'top right' }}
-              >
-                {DOMAIN_CARDS.map(({ Icon, tk }, i) => (
-                  <div
-                    key={tk}
-                    style={{ transform: `translateX(${i % 2 === 0 ? '0px' : '8px'})` }}
-                    className="flex w-[188px] items-center gap-3 rounded-2xl border border-border bg-card/95 px-3 py-2.5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-md xl:w-[200px]"
-                  >
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background/80 text-primary">
-                      <Icon className="size-4" aria-hidden />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold leading-tight text-foreground">
-                        {t(`home.hero.visual.${tk}.title`)}
-                      </p>
-                      <p className="truncate text-[11px] text-muted-foreground">
-                        {t(`home.hero.visual.${tk}.desc`)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-
-                {/* connector SVG */}
-                <svg
-                  aria-hidden
-                  className="absolute -right-7 bottom-10 overflow-visible"
-                  width="36" height="60"
-                  viewBox="0 0 36 60"
-                  fill="none"
-                >
-                  <path
-                    d="M2 0 Q2 30 34 30"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeDasharray="3 3"
-                    className="text-primary/40"
-                  />
-                  <circle cx="34" cy="30" r="3" className="fill-primary/60" />
-                </svg>
-              </div>
-
-              {/* Sahayak panel — tilted right */}
-              <div
-                role="img"
-                aria-label={t('home.hero.panel.ariaLabel')}
-                className="relative z-20 w-full max-w-[360px] rounded-2xl border border-border bg-card/97 shadow-2xl shadow-primary/10 backdrop-blur-md xl:max-w-[380px]"
-                style={{ transform: 'rotate(2deg)', transformOrigin: 'top left' }}
-              >
-                {/* header */}
-                <div className="flex items-center justify-between rounded-t-2xl border-b border-border bg-card px-5 py-3.5">
-                  <div className="flex items-center gap-2">
-                    <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-                      <ShieldCheck className="size-4" aria-hidden />
-                    </span>
-                    <span className="text-sm font-semibold text-foreground">
-                      {t('home.hero.panel.title')}
-                    </span>
-                  </div>
-                  <span className="text-[10px] tracking-wide text-muted-foreground">
-                    {t('home.hero.panel.tagline')}
-                  </span>
-                </div>
-
-                {/* textarea */}
-                <div className="px-5 pt-4">
-                  <p className="min-h-[68px] text-sm leading-relaxed text-muted-foreground/80">
-                    {t('home.hero.panel.placeholder')}
-                  </p>
-                  <div className="flex items-center justify-between py-3">
-                    <div className="flex items-center gap-3 text-muted-foreground">
-                      <Paperclip className="size-4" aria-hidden />
-                      <Mic className="size-4" aria-hidden />
-                      <span className="flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-xs font-medium text-foreground">
-                        <MapPin className="size-3" aria-hidden />
-                        {t('home.hero.panel.region')}
-                        <ChevronDown className="size-3 opacity-50" aria-hidden />
-                      </span>
-                    </div>
-                    <span className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
-                      <ArrowRight className="size-4" aria-hidden />
-                    </span>
-                  </div>
-                </div>
-
-                {/* examples */}
-                <div className="rounded-b-2xl border-t border-border bg-muted/30 px-5 py-4">
-                  <p className="mb-3 flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
-                    <span className="size-1.5 rounded-full bg-primary" aria-hidden />
-                    {t('home.hero.panel.examplesLabel')}
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {PANEL_EXAMPLES.map((key) => (
-                      <span
-                        key={key}
-                        className="flex items-start justify-between gap-1 rounded-xl border border-border bg-card px-2.5 py-2 text-[11px] leading-snug text-foreground/80"
-                      >
-                        {t(`home.hero.panel.${key}`)}
-                        <ArrowUpRight className="mt-0.5 size-3 shrink-0 text-muted-foreground" aria-hidden />
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-            </div>
+    {/* domain card column — tilted left */}
+    <div
+      className="relative z-10 hidden flex-col gap-2 md:flex"
+      // style={{ transform: ' translateX(-8px)', transformOrigin: 'top right' }}
+      style={{
+        transform: 'perspective(1200px) rotateY(20deg) rotateX(2deg)',
+        transformOrigin: 'left center',
+      }}
+    >
+      {DOMAIN_CARDS.map(({ Icon, tk }, i) => (
+        <div
+          key={tk}
+          // style={{ transform: `translateX(${i % 2 === 0 ? '0px' : '8px'})` }}
+          className="flex w-[198px] items-center gap-2.5 rounded-2xl border border-border bg-card/95 px-3 py-2.5 shadow-sm backdrop-blur-sm transition-all bottom-5 top-[-5] duration-300 hover:scale-[1.02] hover:shadow-md xl:w-[200px]"
+        >
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background/80 text-primary">
+            <Icon className="size-4" aria-hidden />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold leading-tight text-foreground">
+              {t(`home.hero.visual.${tk}.title`)}
+            </p>
+            <p className="truncate text-[11px] text-muted-foreground">
+              {t(`home.hero.visual.${tk}.desc`)}
+            </p>
           </div>
+        </div>
+      ))}
+
+      {/* connector SVG — from top of card to mid of AnvashAI panel */}
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute left-full top-3 z-30 overflow-visible"
+        width="120"
+        height="200"
+        viewBox="0 0 120 200"
+        fill="none"
+      >
+        <path
+          d="M0 0 C50 0, 60 100, 120 100"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeDasharray="3 3"
+          className="text-primary/40"
+        />
+        <circle cx="120" cy="100" r="3" className="fill-primary/60" />
+      </svg>
+    </div>
+
+    {/* AnvashAI panel — tilted right (3D) */}
+    <div
+      role="img"
+      aria-label={t('home.hero.panel.ariaLabel')}
+      className="relative z-20 w-full max-w-[360px] rounded-2xl border top-20 border-border bg-card/97 shadow-2xl shadow-primary/10 backdrop-blur-md xl:max-w-[320px]"
+      style={{
+        transform: 'perspective(1200px) rotateY(16deg) rotateX(2deg)',
+        transformOrigin: 'left center',
+      }}
+    >
+      {/* header */}
+      <div className="flex items-center justify-between rounded-t-2xl border-b border-border bg-card px-5 py-3.5">
+        <div className="flex items-center gap-2">
+          <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+            <ShieldCheck className="size-4" aria-hidden />
+          </span>
+          <span className="text-sm font-semibold text-foreground">
+            {t('home.hero.panel.title')}
+          </span>
+        </div>
+        <span className="text-[10px] tracking-wide text-muted-foreground">
+          {t('home.hero.panel.tagline')}
+        </span>
+      </div>
+
+      <div className="px-5 pt-4">
+        <p className="min-h-[68px] text-sm leading-relaxed text-muted-foreground/80">
+          {t('home.hero.panel.placeholder')}
+        </p>
+        <div className="flex items-center justify-between py-3">
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <Paperclip className="size-4" aria-hidden />
+            <Mic className="size-4" aria-hidden />
+            <span className="flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-xs font-medium text-foreground">
+              <MapPin className="size-3" aria-hidden />
+              {t('home.hero.panel.region')}
+              <ChevronDown className="size-3 opacity-50" aria-hidden />
+            </span>
+          </div>
+          <span className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
+            <ArrowRight className="size-4" aria-hidden />
+          </span>
+        </div>
+      </div>
+
+      {/* examples */}
+      <div className="rounded-b-2xl border-t border-border bg-muted/30 px-5 py-4">
+        <p className="mb-3 flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+          <span className="size-1.5 rounded-full bg-primary" aria-hidden />
+          {t('home.hero.panel.examplesLabel')}
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          {PANEL_EXAMPLES.map((key) => (
+            <span
+              key={key}
+              className="flex items-start justify-between gap-1 rounded-xl border border-border bg-card px-2.5 py-2 text-[11px] leading-snug text-foreground/80"
+            >
+              {t(`home.hero.panel.${key}`)}
+              <ArrowUpRight className="mt-0.5 size-3 shrink-0 text-muted-foreground" aria-hidden />
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
         </div>
 
         {/* bottom: evidence chain + statement */}

@@ -5,7 +5,7 @@ import { I18nProvider } from '@/components/providers/i18n-provider'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'IP-SAKTI Sahayak',
+  title: 'Anvashai',
   description:
     'Evidence-first, multilingual AI assistant for intellectual property and regulatory guidance in Ayurveda, across national and international regimes.',
   generator: 'v0.app',
