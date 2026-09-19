@@ -13,7 +13,10 @@ import {
   X,
   Plus,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Languages,
+  ChevronDown,
+  Check
 } from 'lucide-react'
 
 const FORMULATION_TYPES = [
@@ -65,6 +68,7 @@ export default function AnalysisPage() {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [selectedLanguage, setSelectedLanguage] = useState('en')
   const [isSpeechSupported, setIsSpeechSupported] = useState(true)
+  const [showLanguagePicker, setShowLanguagePicker] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const recognitionRef = useRef<any>(null)
@@ -291,6 +295,11 @@ export default function AnalysisPage() {
     })
   }, [])
 
+  const getLanguageName = (code: string) => {
+    const lang = LANGUAGES.find((l) => l.code === code)
+    return lang ? lang.name : code
+  }
+
   // Cleanup
   useEffect(() => {
     return () => {
@@ -305,29 +314,67 @@ export default function AnalysisPage() {
   return (
     <main className="flex min-h-[calc(100vh-56px)] flex-col bg-background">
       {/* Page Header */}
-      <div className="border-b border-border bg-background/95 px-4 py-8 md:px-8">
+      <div className="border-b border-border bg-background/95 px-4 py-6 sm:px-6 sm:py-8 md:px-8">
         <div className="mx-auto max-w-3xl">
-          <div className="mb-2 flex items-center gap-2">
-            <span className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground sm:text-xs sm:tracking-[0.25em]">
               FORMULATION WORKSPACE · INDIA
             </span>
+            {/* Language Picker */}
+            <div className="relative">
+              <button
+                type="button"
+                aria-label="Select language"
+                onClick={() => setShowLanguagePicker(!showLanguagePicker)}
+                className="flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted sm:gap-1.5 sm:px-3 sm:py-1.5"
+              >
+                <Languages className="size-2.5 sm:size-3" />
+                <span className="hidden sm:inline">{getLanguageName(selectedLanguage)}</span>
+                <span className="sm:hidden">{selectedLanguage.toUpperCase()}</span>
+                <ChevronDown className="size-2.5 text-muted-foreground sm:size-3" />
+              </button>
+              {showLanguagePicker && (
+                <div className="absolute right-0 top-full mt-1 max-h-60 w-44 overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-lg z-50 sm:w-48">
+                  {LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.code}
+                      type="button"
+                      onClick={() => {
+                        setSelectedLanguage(lang.code)
+                        setShowLanguagePicker(false)
+                      }}
+                      className={`flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-muted sm:px-3 sm:py-2 ${
+                        selectedLanguage === lang.code
+                          ? 'bg-muted text-foreground'
+                          : 'text-muted-foreground'
+                      }`}
+                    >
+                      <span>{lang.name}</span>
+                      {selectedLanguage === lang.code && (
+                        <Check className="size-3" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-foreground md:text-4xl">
+          <h1 className="text-2xl font-bold text-foreground sm:text-3xl md:text-4xl">
             Tell us about your formulation
           </h1>
-          <p className="mt-3 text-base text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground sm:mt-3 sm:text-base">
             Share what you know. Sahayak will organize the evidence and identify what needs a closer look.
           </p>
         </div>
       </div>
 
       {/* Form Container */}
-      <div className="flex-1 px-4 py-8 md:px-8">
+      <div className="flex-1 px-4 py-6 sm:px-6 sm:py-8 md:px-8">
         <div className="mx-auto max-w-3xl">
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm md:p-8">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6 md:p-8">
             
             {/* Formulation Name */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label htmlFor="formulation-name" className="mb-2 block text-sm font-medium text-foreground">
                 Formulation name <span className="text-destructive">*</span>
               </label>
@@ -338,6 +385,7 @@ export default function AnalysisPage() {
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 aria-required="true"
+                className="text-sm"
               />
               {validationErrors.name && (
                 <p className="mt-1 text-xs text-destructive">{validationErrors.name}</p>
@@ -345,7 +393,7 @@ export default function AnalysisPage() {
             </div>
 
             {/* Formulation Type */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label htmlFor="formulation-type" className="mb-2 block text-sm font-medium text-foreground">
                 Formulation type (optional)
               </label>
@@ -353,7 +401,7 @@ export default function AnalysisPage() {
                 id="formulation-type"
                 value={formData.formulationType}
                 onChange={(e) => setFormData(prev => ({ ...prev, formulationType: e.target.value }))}
-                className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 sm:px-4 sm:py-3"
               >
                 <option value="">Select type...</option>
                 {FORMULATION_TYPES.map(type => (
@@ -363,7 +411,7 @@ export default function AnalysisPage() {
             </div>
 
             {/* Ingredients */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label htmlFor="ingredient-input" className="mb-2 block text-sm font-medium text-foreground">
                 Ingredients <span className="text-destructive">*</span>
               </label>
@@ -381,48 +429,49 @@ export default function AnalysisPage() {
                     }
                   }}
                   aria-label="Add ingredient"
-                  className="flex-1"
+                  className="flex-1 text-sm"
                 />
                 <Button
                   type="button"
                   onClick={addIngredient}
                   variant="outline"
-                  className="gap-2"
+                  className="gap-2 px-3 sm:px-4"
+                  size="sm"
                 >
-                  <Plus className="size-4" />
-                  Add
+                  <Plus className="size-3.5 sm:size-4" />
+                  <span className="hidden sm:inline">Add</span>
                 </Button>
               </div>
-              
+
               {/* Ingredient Chips */}
               {formData.ingredients.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-2">
                   {formData.ingredients.map((ingredient, index) => (
                     <span
                       key={index}
-                      className="flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-sm font-medium text-foreground"
+                      className="flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-2.5 py-1 text-xs font-medium text-foreground sm:px-3 sm:py-1.5 sm:text-sm"
                     >
                       {ingredient}
                       <button
                         type="button"
                         onClick={() => removeIngredient(index)}
-                        className="flex size-4 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        className="flex size-3.5 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive sm:size-4"
                         aria-label={`Remove ${ingredient}`}
                       >
-                        <X className="size-3" />
+                        <X className="size-2.5 sm:size-3" />
                       </button>
                     </span>
                   ))}
                 </div>
               )}
-              
+
               {validationErrors.ingredients && (
                 <p className="mt-1 text-xs text-destructive">{validationErrors.ingredients}</p>
               )}
             </div>
 
             {/* Intended Use */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label htmlFor="intended-use" className="mb-2 block text-sm font-medium text-foreground">
                 Intended use <span className="text-destructive">*</span>
               </label>
@@ -433,6 +482,7 @@ export default function AnalysisPage() {
                 value={formData.intendedUse}
                 onChange={(e) => setFormData(prev => ({ ...prev, intendedUse: e.target.value }))}
                 aria-required="true"
+                className="text-sm"
               />
               {validationErrors.intendedUse && (
                 <p className="mt-1 text-xs text-destructive">{validationErrors.intendedUse}</p>
@@ -440,7 +490,7 @@ export default function AnalysisPage() {
             </div>
 
             {/* Preparation / Processing Method */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label htmlFor="preparation-process" className="mb-2 block text-sm font-medium text-foreground">
                 Preparation / processing method
               </label>
@@ -450,14 +500,14 @@ export default function AnalysisPage() {
                   placeholder="Describe how it is prepared or processed, such as extraction, heating, fermentation, drying, or mixing."
                   value={formData.preparationProcess}
                   onChange={(e) => setFormData(prev => ({ ...prev, preparationProcess: e.target.value }))}
-                  rows={4}
-                  className="pr-12"
+                  rows={3}
+                  className="pr-10 text-sm sm:pr-12 sm:rows-4"
                 />
                 <button
                   type="button"
                   onClick={() => toggleVoiceRecording('preparationProcess')}
                   disabled={!isSpeechSupported}
-                  className={`absolute bottom-3 right-3 flex size-8 items-center justify-center rounded-lg transition-colors hover:bg-muted ${
+                  className={`absolute bottom-2.5 right-2.5 flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-muted sm:bottom-3 sm:right-3 sm:size-8 ${
                     voiceState === 'listening' && activeVoiceField === 'preparationProcess'
                       ? 'text-red-500 animate-pulse'
                       : 'text-muted-foreground'
@@ -465,16 +515,16 @@ export default function AnalysisPage() {
                   aria-label="Voice input for preparation method"
                 >
                   {voiceState === 'listening' && activeVoiceField === 'preparationProcess' ? (
-                    <MicOff className="size-4" />
+                    <MicOff className="size-3.5 sm:size-4" />
                   ) : (
-                    <Mic className="size-4" />
+                    <Mic className="size-3.5 sm:size-4" />
                   )}
                 </button>
               </div>
             </div>
 
             {/* Traditional or Community Use */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label htmlFor="traditional-use" className="mb-2 block text-sm font-medium text-foreground">
                 Traditional or community use (optional)
               </label>
@@ -484,14 +534,14 @@ export default function AnalysisPage() {
                   placeholder="Describe any known traditional use, community use, region, textual reference, or documented practice."
                   value={formData.traditionalUse}
                   onChange={(e) => setFormData(prev => ({ ...prev, traditionalUse: e.target.value }))}
-                  rows={4}
-                  className="pr-12"
+                  rows={3}
+                  className="pr-10 text-sm sm:pr-12 sm:rows-4"
                 />
                 <button
                   type="button"
                   onClick={() => toggleVoiceRecording('traditionalUse')}
                   disabled={!isSpeechSupported}
-                  className={`absolute bottom-3 right-3 flex size-8 items-center justify-center rounded-lg transition-colors hover:bg-muted ${
+                  className={`absolute bottom-2.5 right-2.5 flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-muted sm:bottom-3 sm:right-3 sm:size-8 ${
                     voiceState === 'listening' && activeVoiceField === 'traditionalUse'
                       ? 'text-red-500 animate-pulse'
                       : 'text-muted-foreground'
@@ -499,22 +549,22 @@ export default function AnalysisPage() {
                   aria-label="Voice input for traditional use"
                 >
                   {voiceState === 'listening' && activeVoiceField === 'traditionalUse' ? (
-                    <MicOff className="size-4" />
+                    <MicOff className="size-3.5 sm:size-4" />
                   ) : (
-                    <Mic className="size-4" />
+                    <Mic className="size-3.5 sm:size-4" />
                   )}
                 </button>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="mt-2 text-[10px] text-muted-foreground sm:text-xs">
                 Only share information that you are permitted to disclose.
               </p>
             </div>
 
             {/* Voice Error */}
             {voiceError && (
-              <div className="mb-6 flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive sm:mb-6">
                 <AlertCircle className="size-4" />
-                <span>{voiceError}</span>
+                <span className="text-xs sm:text-sm">{voiceError}</span>
                 <button
                   type="button"
                   onClick={() => setVoiceError(null)}
@@ -526,11 +576,11 @@ export default function AnalysisPage() {
             )}
 
             {/* Attachment */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label className="mb-2 block text-sm font-medium text-foreground">
                 Attachment (optional)
               </label>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -542,22 +592,23 @@ export default function AnalysisPage() {
                   type="button"
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  className="gap-2"
+                  className="gap-2 w-full sm:w-auto"
+                  size="sm"
                 >
-                  <Paperclip className="size-4" />
-                  Attach file
+                  <Paperclip className="size-3.5 sm:size-4" />
+                  <span>Attach file</span>
                 </Button>
-                
+
                 {formData.attachment && (
                   <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
-                    <span className="text-sm text-foreground">{formData.attachment.name}</span>
+                    <span className="text-xs text-foreground truncate sm:text-sm">{formData.attachment.name}</span>
                     <button
                       type="button"
                       onClick={removeAttachment}
-                      className="flex size-5 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                      className="flex size-4 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive sm:size-5"
                       aria-label="Remove attachment"
                     >
-                      <X className="size-3" />
+                      <X className="size-2.5 sm:size-3" />
                     </button>
                   </div>
                 )}
@@ -565,14 +616,14 @@ export default function AnalysisPage() {
               {validationErrors.attachment && (
                 <p className="mt-1 text-xs text-destructive">{validationErrors.attachment}</p>
               )}
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="mt-2 text-[10px] text-muted-foreground sm:text-xs">
                 Supported formats: PDF, DOC, DOCX, TXT (max 10MB)
               </p>
             </div>
 
             {/* Privacy Note */}
-            <div className="mb-6 rounded-lg bg-muted/30 px-4 py-3">
-              <p className="text-xs text-muted-foreground">
+            <div className="mb-4 rounded-lg bg-muted/30 px-3 py-2.5 sm:mb-6 sm:px-4 sm:py-3">
+              <p className="text-[10px] text-muted-foreground sm:text-xs">
                 Privacy-first processing. Avoid sharing confidential information unless necessary.
               </p>
             </div>
@@ -588,7 +639,8 @@ export default function AnalysisPage() {
               {submitState === 'submitting' ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  Preparing formulation analysis...
+                  <span className="hidden sm:inline">Preparing formulation analysis...</span>
+                  <span className="sm:hidden">Analyzing...</span>
                 </>
               ) : (
                 <>
@@ -599,15 +651,15 @@ export default function AnalysisPage() {
             </Button>
 
             {validationErrors.submit && (
-              <p className="mt-2 text-center text-sm text-destructive">{validationErrors.submit}</p>
+              <p className="mt-2 text-center text-xs text-destructive sm:text-sm">{validationErrors.submit}</p>
             )}
 
             {/* Example Section */}
-            <div className="mt-8 border-t border-border/40 pt-6">
-              <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <div className="mt-6 border-t border-border/40 pt-4 sm:mt-8 sm:pt-6">
+              <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground sm:mb-3 sm:text-xs">
                 Example
               </p>
-              <p className="mb-3 text-sm text-muted-foreground">
+              <p className="mb-2 text-xs text-muted-foreground sm:mb-3 sm:text-sm">
                 Neem and turmeric based Ayurvedic formulation for skin care
               </p>
               <Button

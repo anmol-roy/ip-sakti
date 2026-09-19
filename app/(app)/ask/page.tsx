@@ -386,7 +386,7 @@ export default function AskPage() {
     <main className="relative flex min-h-[calc(100vh-56px)] w-full flex-col overflow-hidden bg-background">
       {/* ── BG IMAGES ──────────────────────────────────────── */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0 select-none">
-        <div className="absolute bottom-0 left-0 h-[420px] w-[300px] opacity-[0.18] dark:opacity-[0.08]">
+        <div className="absolute bottom-0 left-0 h-[420px] w-[300px] opacity-[0.18] dark:opacity-[0.08] md:h-[420px] md:w-[300px] lg:h-[480px] lg:w-[340px] hidden sm:block">
           <Image
             src="/image/ask/ask_bg.png"
             alt=""
@@ -396,7 +396,7 @@ export default function AskPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent to-background" />
         </div>
-        <div className="absolute bottom-0 right-0 h-[480px] w-[340px] opacity-[0.15] dark:opacity-[0.07]">
+        <div className="absolute bottom-0 right-0 h-[480px] w-[340px] opacity-[0.15] dark:opacity-[0.07] md:h-[480px] md:w-[340px] hidden sm:block">
           <Image
             src="/image/ask/ask_bg.png"
             alt=""
@@ -409,20 +409,20 @@ export default function AskPage() {
       </div>
 
       {/* ── CONTENT ────────────────────────────────────────── */}
-      <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-10 md:px-6 md:py-16">
+      <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-6 sm:px-6 sm:py-10 md:px-6 md:py-16">
         {/* heading */}
-        <div className="mb-10 text-center">
-          <div aria-hidden className="mx-auto mb-5 h-1 w-10 rounded-full bg-primary" />
-          <h1 className="mb-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+        <div className="mb-6 text-center sm:mb-8 md:mb-10">
+          <div aria-hidden className="mx-auto mb-4 h-1 w-8 rounded-full bg-primary sm:mb-5 sm:w-10" />
+          <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground sm:mb-3 sm:text-3xl md:text-4xl">
             {t('home.ask.heading')}
           </h1>
-          <p className="mx-auto max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
+          <p className="mx-auto max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base md:text-lg">
             {t('home.ask.subheading')}
           </p>
         </div>
 
         {/* input card */}
-        <div className="mb-8 rounded-2xl border border-border bg-card shadow-lg shadow-primary/5">
+        <div className="mb-6 rounded-2xl border border-border bg-card shadow-lg shadow-primary/5 sm:mb-8">
           <textarea
             ref={textareaRef}
             value={question}
@@ -430,7 +430,7 @@ export default function AskPage() {
             onKeyDown={handleKeyDown}
             placeholder={t('home.ask.placeholder')}
             rows={4}
-            className="w-full resize-none rounded-t-2xl bg-transparent px-5 pt-5 pb-2 text-base text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+            className="w-full resize-none rounded-t-2xl bg-transparent px-4 pt-4 pb-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none sm:px-5 sm:pt-5 sm:text-base"
             aria-label={t('home.ask.placeholder')}
           />
 
@@ -483,17 +483,17 @@ export default function AskPage() {
           )}
 
           {/* toolbar */}
-          <div className="flex items-center justify-between px-4 pb-4 pt-1">
-            <div className="flex items-center gap-1">
+          <div className="flex flex-col gap-3 px-4 pb-4 pt-1 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
+            <div className="flex items-center gap-1 sm:gap-2">
               {/* attach */}
               <button
                 type="button"
                 aria-label={t('home.ask.attachLabel')}
-                className="flex size-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="flex size-8 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:size-9"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isProcessingFile}
               >
-                <Paperclip className="size-4" />
+                <Paperclip className="size-3.5 sm:size-4" />
               </button>
               <input
                 ref={fileInputRef}
@@ -512,20 +512,20 @@ export default function AskPage() {
                   aria-label={t('home.ask.micLabel')}
                   onClick={toggleRecording}
                   disabled={!isSpeechSupported}
-                  className={`flex size-9 items-center justify-center rounded-xl transition-colors hover:bg-muted hover:text-foreground ${
+                  className={`flex size-8 items-center justify-center rounded-xl transition-colors hover:bg-muted hover:text-foreground sm:size-9 ${
                     isRecording
                       ? 'text-red-500 hover:text-red-600 animate-pulse'
                       : 'text-muted-foreground'
                   } ${!isSpeechSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  <Mic className="size-4" />
+                  <Mic className="size-3.5 sm:size-4" />
                 </button>
                 {isRecording && (
-                  <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-background border border-border px-3 py-1.5 text-xs shadow-lg flex items-center gap-3">
+                  <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-background border border-border px-2 py-1 text-xs shadow-lg flex items-center gap-2 sm:px-3 sm:py-1.5 sm:gap-3">
                     <span className="text-red-500 font-mono">
                       {formatTime(recordingTime)}
                     </span>
-                    <span className="text-muted-foreground">Recording...</span>
+                    <span className="text-muted-foreground hidden sm:inline">Recording...</span>
                   </div>
                 )}
               </div>
@@ -536,14 +536,15 @@ export default function AskPage() {
                   type="button"
                   aria-label="Select language"
                   onClick={() => setShowLanguagePicker(!showLanguagePicker)}
-                  className="flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                  className="flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted sm:gap-1.5 sm:px-3 sm:py-1.5"
                 >
-                  <Languages className="size-3" />
-                  {getLanguageName(selectedLanguage)}
-                  <ChevronDown className="size-3 text-muted-foreground" />
+                  <Languages className="size-2.5 sm:size-3" />
+                  <span className="hidden sm:inline">{getLanguageName(selectedLanguage)}</span>
+                  <span className="sm:hidden">{selectedLanguage.toUpperCase()}</span>
+                  <ChevronDown className="size-2.5 text-muted-foreground sm:size-3" />
                 </button>
                 {showLanguagePicker && (
-                  <div className="absolute left-0 top-full mt-1 max-h-60 w-48 overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-lg z-50">
+                  <div className="absolute left-0 top-full mt-1 max-h-60 w-44 overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-lg z-50 sm:w-48">
                     {LANGUAGES.map((lang) => (
                       <button
                         key={lang.code}
@@ -552,7 +553,7 @@ export default function AskPage() {
                           setSelectedLanguage(lang.code)
                           setShowLanguagePicker(false)
                         }}
-                        className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-sm hover:bg-muted ${
+                        className={`flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-muted sm:px-3 sm:py-2 ${
                           selectedLanguage === lang.code
                             ? 'bg-muted text-foreground'
                             : 'text-muted-foreground'
@@ -576,15 +577,16 @@ export default function AskPage() {
                   onClick={() =>
                     setShowJurisdictionDropdown(!showJurisdictionDropdown)
                   }
-                  className="flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                  className="flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted sm:gap-1.5 sm:px-3 sm:py-1.5"
                 >
-                  <MapPin className="size-3 text-primary" />
-                  {JURISDICTIONS.find((j) => j.value === selectedJurisdiction)
-                    ?.label || 'India'}
-                  <ChevronDown className="size-3 text-muted-foreground" />
+                  <MapPin className="size-2.5 text-primary sm:size-3" />
+                  <span className="hidden sm:inline">{JURISDICTIONS.find((j) => j.value === selectedJurisdiction)
+                    ?.label || 'India'}</span>
+                  <span className="sm:hidden">{selectedJurisdiction === 'india' ? 'IN' : selectedJurisdiction === 'international' ? 'INT' : 'CMP'}</span>
+                  <ChevronDown className="size-2.5 text-muted-foreground sm:size-3" />
                 </button>
                 {showJurisdictionDropdown && (
-                  <div className="absolute left-0 top-full mt-1 w-40 rounded-lg border border-border bg-popover p-1 shadow-lg z-50">
+                  <div className="absolute left-0 top-full mt-1 w-36 rounded-lg border border-border bg-popover p-1 shadow-lg z-50 sm:w-40">
                     {JURISDICTIONS.map((j) => (
                       <button
                         key={j.value}
@@ -593,7 +595,7 @@ export default function AskPage() {
                           setSelectedJurisdiction(j.value)
                           setShowJurisdictionDropdown(false)
                         }}
-                        className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-sm hover:bg-muted ${
+                        className={`flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-muted sm:px-3 sm:py-2 ${
                           selectedJurisdiction === j.value
                             ? 'bg-muted text-foreground'
                             : 'text-muted-foreground'
@@ -610,9 +612,9 @@ export default function AskPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <span
-                className={`text-xs tabular-nums ${
+                className={`text-[10px] tabular-nums sm:text-xs ${
                   remaining < 100 ? 'text-destructive' : 'text-muted-foreground'
                 }`}
               >
@@ -623,12 +625,12 @@ export default function AskPage() {
                 onClick={handleSubmit}
                 disabled={!canSubmit || submitting}
                 aria-label={t('home.ask.submitLabel')}
-                className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40 sm:size-10"
               >
                 {submitting ? (
-                  <span className="size-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                  <span className="size-3.5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent sm:size-4" />
                 ) : (
-                  <ArrowUp className="size-5" />
+                  <ArrowUp className="size-4 sm:size-5" />
                 )}
               </button>
             </div>
@@ -637,27 +639,27 @@ export default function AskPage() {
 
         {/* suggestions */}
         <div className="mb-auto">
-          <p className="mb-4 text-center text-xs font-medium uppercase tracking-widest text-muted-foreground">
+          <p className="mb-3 text-center text-[10px] font-medium uppercase tracking-widest text-muted-foreground sm:mb-4 sm:text-xs">
             {t('home.ask.tryAsking')}
           </p>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-2 sm:gap-3 sm:grid-cols-3">
             {SUGGESTIONS.map(({ key, Icon, color, iconBg }) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => fillSuggestion(t(`home.ask.${key}`))}
-                className={`group flex items-start gap-3 rounded-xl border p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md ${color}`}
+                className={`group flex items-start gap-2 rounded-xl border p-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-md sm:gap-3 sm:p-4 ${color}`}
               >
                 <span
-                  className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${iconBg}`}
+                  className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${iconBg} sm:size-9`}
                 >
-                  <Icon className="size-4" aria-hidden />
+                  <Icon className="size-3.5 aria-hidden sm:size-4" />
                 </span>
-                <p className="flex-1 text-xs leading-relaxed text-foreground">
+                <p className="flex-1 text-[11px] leading-relaxed text-foreground sm:text-xs">
                   {t(`home.ask.${key}`)}
                 </p>
                 <ArrowRight
-                  className="mt-0.5 size-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+                  className="mt-0.5 size-3 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 sm:size-3.5"
                   aria-hidden
                 />
               </button>
@@ -666,11 +668,11 @@ export default function AskPage() {
         </div>
 
         {/* footer tagline */}
-        <p className="mt-12 text-center text-[10px] font-medium uppercase tracking-[0.3em] text-muted-foreground/60">
+        <p className="mt-8 text-center text-[8px] font-medium uppercase tracking-[0.2em] text-muted-foreground/60 sm:mt-12 sm:text-[10px] sm:tracking-[0.3em]">
           {t('home.ask.footerKnowledge')}
-          <span className="mx-3">|</span>
+          <span className="mx-2 sm:mx-3">|</span>
           {t('home.ask.footerInnovation')}
-          <span className="mx-3">|</span>
+          <span className="mx-2 sm:mx-3">|</span>
           {t('home.ask.footerStatement')}
         </p>
       </div>
