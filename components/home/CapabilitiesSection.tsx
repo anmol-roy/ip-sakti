@@ -190,10 +190,10 @@ export function CapabilitiesSection() {
   const { t } = useI18n()
 
   return (
-    <section className="relative border-b border-border bg-[#f4f8f6] px-4 py-10 md:px-8 md:py-16">
+    <section className="home-shell relative border-b border-border px-4 py-10 md:px-8 md:py-16">
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <svg className="absolute -right-40 top-0 h-[400px] w-[400px] opacity-20" viewBox="0 0 600 600" fill="none">
-          <path d="M100 500 Q300 100 550 200" stroke="#cfe4d9" strokeWidth="1" fill="none" />
+          <path d="M100 500 Q300 100 550 200" stroke="var(--border)" strokeWidth="1" fill="none" />
         </svg>
       </div>
 
@@ -202,11 +202,11 @@ export function CapabilitiesSection() {
         {/* ── HEADER ── */}
         <div className="mb-12 flex flex-col items-center text-center">
           <div className="mb-4 flex items-center gap-3">
-            <span className="h-px w-8 bg-[#c9ddd4]" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#7fa593]">
+            <span className="h-px w-8 bg-border" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-primary">
               Research Capabilities
             </span>
-            <span className="h-px w-8 bg-[#c9ddd4]" />
+            <span className="h-px w-8 bg-border" />
           </div>
           <h2 className="mb-4 text-3xl font-bold leading-tight text-foreground md:text-4xl">
             One workspace for complex IP research
@@ -222,16 +222,16 @@ export function CapabilitiesSection() {
 
           {/* ══════════ LEFT: PRIMARY CARD (Spans full height) ══════════ */}
           <div className="lg:col-span-5">
-            <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#dcebe3] bg-[#f9fcfb] p-6 transition-colors duration-300 hover:border-[#a9c8b8] md:p-7">
+            <div className="home-panel group relative flex h-full flex-col overflow-hidden rounded-2xl p-6 transition-colors duration-300 md:p-7">
               
               {/* Icon */}
-              <span className="mb-4 flex size-10 items-center justify-center rounded-lg border border-[#cfe4d9] bg-[#eef5f1] text-[#5b8a76]">
+              <span className="home-step-icon mb-4 flex size-10 items-center justify-center rounded-lg text-primary">
                 <FileText className="size-5" aria-hidden strokeWidth={1.5} />
               </span>
 
               {/* Title */}
               <div className="relative mb-6">
-                <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.24em] text-[#8fb3a4]">
+                <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.24em] text-primary">
                   {t('home.capabilities.primaryLabel')}
                 </p>
                 <h3 className="mb-2 text-xl font-bold leading-tight text-foreground md:text-2xl">
@@ -251,14 +251,14 @@ export function CapabilitiesSection() {
               <div className="mt-auto grid grid-cols-[1fr_auto] gap-3">
                 
                 {/* Workflow Steps */}
-                <div className="rounded-xl border border-[#e6f0ea] bg-white/50 p-4">
+                <div className="home-panel-soft rounded-xl p-4">
                   <ol className="space-y-3">
                     {workflow.map(({ key, desc, Icon }, i) => (
                       <li key={key} className="relative flex gap-2.5">
                         {i < workflow.length - 1 && (
-                          <span className="absolute left-[11px] top-6 h-[18px] w-px bg-[#dcebe3]" />
+                          <span className="absolute left-[11px] top-6 h-[18px] w-px bg-border" />
                         )}
-                        <span className="relative z-10 flex size-6 shrink-0 items-center justify-center rounded-full border border-[#cfe4d9] bg-white text-[#5b8a76]">
+                        <span className="home-step-node relative z-10 flex size-6 shrink-0 items-center justify-center rounded-full text-primary">
                           <Icon className="size-3" aria-hidden strokeWidth={2} />
                         </span>
                         <div className="min-w-0 pt-0.5">
@@ -275,10 +275,10 @@ export function CapabilitiesSection() {
                 </div>
 
                 {/* Checklist */}
-                <ul className="flex flex-col gap-2 self-start rounded-xl border border-[#e6f0ea] bg-[#f4f8f6] px-3.5 py-3">
+                <ul className="home-panel-muted flex flex-col gap-2 self-start rounded-xl px-3.5 py-3">
                   {primaryChecks.map((key) => (
                     <li key={key} className="flex items-center gap-2 whitespace-nowrap">
-                      <CheckCircle2 className="size-3.5 shrink-0 text-[#7fa593]" aria-hidden strokeWidth={2} />
+                      <CheckCircle2 className="size-3.5 shrink-0 text-primary" aria-hidden strokeWidth={2} />
                       <span className="text-[10px] font-medium text-foreground/80">
                         {t(`home.capabilities.${key}`)}
                       </span>
@@ -290,7 +290,7 @@ export function CapabilitiesSection() {
               {/* CTA */}
               <a
                 href="#"
-                className="mt-5 inline-flex items-center justify-center gap-2 self-center rounded-full border border-[#cfe4d9] bg-white px-5 py-2 text-[11px] font-medium text-[#5b8a76] transition-colors hover:bg-[#f9fcfb] hover:border-[#a9c8b8]"
+                className="home-cta mt-5 inline-flex items-center justify-center gap-2 self-center rounded-full px-5 py-2 text-[11px] font-medium transition-colors"
               >
                 {t('home.capabilities.primaryCta')}
                 <ArrowRight className="size-3" aria-hidden strokeWidth={2} />
@@ -307,7 +307,7 @@ export function CapabilitiesSection() {
                 {supportingGrid.map(({ Icon, tk, bk, Svg }) => (
                   <div
                     key={tk}
-                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-[#dcebe3] bg-[#f9fcfb] p-5 transition-colors duration-300 hover:border-[#a9c8b8] hover:bg-white md:p-6"
+                    className="home-panel group relative flex flex-col overflow-hidden rounded-2xl p-5 transition-colors duration-300 md:p-6"
                   >
                     {/* Background Illustration */}
                     <div className="pointer-events-none absolute -right-4 top-1/2 h-28 w-32 -translate-y-1/2 opacity-80 transition-opacity duration-300 group-hover:opacity-100">
@@ -316,7 +316,7 @@ export function CapabilitiesSection() {
 
                     {/* Content */}
                     <div className="relative z-10 flex h-full flex-col">
-                      <span className="mb-3 flex size-9 items-center justify-center rounded-lg border border-[#dcebe3] bg-white text-[#5b8a76] transition-colors group-hover:border-[#a9c8b8] group-hover:bg-[#eef5f1]">
+                      <span className="home-step-icon mb-3 flex size-9 items-center justify-center rounded-lg text-primary transition-colors">
                         <Icon className="size-4" aria-hidden strokeWidth={1.5} />
                       </span>
 
@@ -329,7 +329,7 @@ export function CapabilitiesSection() {
 
                       <a
                         href="#"
-                        className="mt-auto pt-4 inline-flex items-center gap-1 text-[11px] font-medium text-[#5b8a76] transition-colors hover:text-[#3d6d5b]"
+                        className="mt-auto pt-4 inline-flex items-center gap-1 text-[11px] font-medium text-primary transition-colors hover:text-primary/80"
                       >
                         {t(`home.capabilities.explore.${tk}`)}
                         <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" aria-hidden strokeWidth={2} />
@@ -343,7 +343,7 @@ export function CapabilitiesSection() {
               {supportingFull.map(({ Icon, tk, bk, Svg }) => (
                 <div
                   key={tk}
-                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-[#dcebe3] bg-[#f9fcfb] p-5 transition-colors duration-300 hover:border-[#a9c8b8] hover:bg-white md:p-6"
+                  className="home-panel group relative flex flex-col overflow-hidden rounded-2xl p-5 transition-colors duration-300 md:p-6"
                 >
                   {/* Background Illustration */}
                   <div className="pointer-events-none absolute -right-6 top-1/2 h-24 w-36 -translate-y-1/2 opacity-80 transition-opacity duration-300 group-hover:opacity-100">
@@ -352,7 +352,7 @@ export function CapabilitiesSection() {
 
                   {/* Content */}
                   <div className="relative z-10 flex h-full flex-col">
-                    <span className="mb-3 flex size-9 items-center justify-center rounded-lg border border-[#dcebe3] bg-white text-[#5b8a76] transition-colors group-hover:border-[#a9c8b8] group-hover:bg-[#eef5f1]">
+                    <span className="home-step-icon mb-3 flex size-9 items-center justify-center rounded-lg text-primary transition-colors">
                       <Icon className="size-4" aria-hidden strokeWidth={1.5} />
                     </span>
 
@@ -365,7 +365,7 @@ export function CapabilitiesSection() {
 
                     <a
                       href="#"
-                      className="mt-auto pt-4 inline-flex items-center gap-1 text-[11px] font-medium text-[#5b8a76] transition-colors hover:text-[#3d6d5b]"
+                      className="mt-auto pt-4 inline-flex items-center gap-1 text-[11px] font-medium text-primary transition-colors hover:text-primary/80"
                     >
                       {t(`home.capabilities.explore.${tk}`)}
                       <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" aria-hidden strokeWidth={2} />

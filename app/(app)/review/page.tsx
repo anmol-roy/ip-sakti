@@ -324,21 +324,13 @@ function ReviewPageContent() {
               {/* Submit Button */}
               <Button
                 onClick={handleSubmit}
-                disabled={pageState === 'submitting'}
                 className="w-full gap-2"
                 size="lg"
               >
-                {pageState === 'submitting' ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    Submitting review request...
-                  </>
-                ) : (
-                  <>
-                    Submit for Review
-                    <ArrowRight className="size-4" />
-                  </>
-                )}
+                <>
+                  Submit for Review
+                  <ArrowRight className="size-4" />
+                </>
               </Button>
             </div>
           )}

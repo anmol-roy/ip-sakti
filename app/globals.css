@@ -216,6 +216,48 @@
   }
 }
 
+@layer components {
+  .home-shell {
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  .home-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+  }
+
+  .home-panel-soft {
+    background: color-mix(in srgb, var(--card) 82%, var(--muted) 18%);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+  }
+
+  .home-panel-muted {
+    background: var(--muted);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+  }
+
+  .home-step-node {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+  }
+
+  .home-step-icon {
+    background: var(--muted);
+    color: var(--foreground);
+  }
+
+  .home-cta {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--primary);
+  }
+}
+
 @keyframes hero-float {
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-5px); }

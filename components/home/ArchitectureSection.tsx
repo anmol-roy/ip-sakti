@@ -73,7 +73,7 @@ export function ArchitectureSection() {
   const { t } = useI18n()
 
   return (
-    <section className="border-b border-border bg-[#FAFAF8] px-4 py-20 md:px-8 md:py-28 dark:bg-background">
+    <section className="home-shell border-b border-border px-4 py-20 md:px-8 md:py-28">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 text-center">
           <span className="mb-3 block text-xs font-semibold uppercase tracking-[0.2em] text-primary">
@@ -89,26 +89,26 @@ export function ArchitectureSection() {
 
         <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:gap-12">
           <div className="relative">
-            <div className="absolute left-5 top-2 bottom-2 w-px bg-slate-200" aria-hidden="true" />
+            <div className="absolute left-5 top-2 bottom-2 w-px bg-border" aria-hidden="true" />
 
             <div className="space-y-4">
               {steps.map(({ num, key, icon }) => (
                 <div key={key} className="relative pl-12">
-                  <div className="absolute left-0 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-xs font-semibold text-slate-700 shadow-sm">
+                  <div className="home-step-node absolute left-0 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center rounded-full text-xs font-semibold shadow-sm">
                     {num}
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.02)]">
+                  <div className="home-panel rounded-2xl px-4 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.02)]">
                     <div className="flex items-start gap-3">
-                      <div className="mt-0.5 flex size-8 items-center justify-center rounded-md bg-slate-100 text-slate-600">
+                      <div className="home-step-icon mt-0.5 flex size-8 items-center justify-center rounded-md">
                         <StepIcon name={icon} />
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-semibold text-slate-900">
+                        <div className="text-sm font-semibold text-foreground">
                           {t(`home.architecture.${key}`)}
                         </div>
-                        <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                           {t(`home.architecture.${key}Desc`) || 'System process step.'}
                         </p>
                       </div>
@@ -120,7 +120,7 @@ export function ArchitectureSection() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               SYSTEM CAPABILITIES
             </div>
 
@@ -128,18 +128,18 @@ export function ArchitectureSection() {
               {capabilities.map(({ key, icon, color }) => (
                 <div
                   key={key}
-                  className={`rounded-2xl border p-4 ${color}`}
+                  className={`home-panel rounded-2xl border p-4 ${color}`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="flex size-8 items-center justify-center rounded-md bg-white/60 text-current shadow-sm">
+                    <div className="home-step-icon flex size-8 items-center justify-center rounded-md text-current shadow-sm">
                       <StepIcon name={icon} />
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-semibold text-slate-900 dark:text-foreground">
+                      <div className="text-sm font-semibold text-foreground">
                         {t(`home.architecture.${key}`)}
                       </div>
-                      <p className="mt-1 text-sm leading-relaxed text-slate-700 dark:text-muted-foreground">
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                         {t(`home.architecture.${key}Desc`) || 'Advanced system capability.'}
                       </p>
                     </div>
