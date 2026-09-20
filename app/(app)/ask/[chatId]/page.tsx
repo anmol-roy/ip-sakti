@@ -20,12 +20,13 @@ import {
   Send,
   Loader2,
   AlertCircle,
-  RotateCcw,
   ChevronDown,
   ChevronUp
 } from 'lucide-react'
 import { useI18n } from '@/components/providers/i18n-provider'
 import { Button } from '@/components/ui/button'
+import { ErrorDisplay } from '@/components/ui/error-display'
+import { apiClient, APIError, AskResponse, FormulationAnalysisResponse } from '@/lib/api-client'
 
 const MAX_CHARS = 2000
 const LANGUAGES = [
@@ -150,8 +151,9 @@ export default function ChatPage() {
   const [loadingState, setLoadingState] = useState<LoadingState>('idle')
   const [listenState, setListenState] = useState<ListenState>('idle')
   const [voiceState, setVoiceState] = useState<VoiceState>('idle')
-  const [copied, setCopied] = useState(false)
   const [voiceError, setVoiceError] = useState<string | null>(null)
+  const [responseCopied, setResponseCopied] = useState(false)
+  const [copiedEvidenceId, setCopiedEvidenceId] = useState<string | null>(null)
   const [selectedLanguage, setSelectedLanguage] = useState('en')
   const [isSpeechSupported, setIsSpeechSupported] = useState(true)
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -159,171 +161,239 @@ export default function ChatPage() {
   const [isFormulationAnalysis, setIsFormulationAnalysis] = useState(false)
   const [showFormulationDetails, setShowFormulationDetails] = useState(false)
   const [chatTitle, setChatTitle] = useState('IP Research Chat')
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
   
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const recognitionRef = useRef<any>(null)
   const isRecordingRef = useRef(false)
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null)
   
-  // Mock AI response generator
-  const generateMockResponse = (query: string, isFormulation = false): AIResponse => {
-    if (isFormulation) {
-      return {
-        preliminaryFinding: 'Traditional knowledge may be relevant to patentability of this formulation.',
-        explanation: 'Based on the ingredients and intended use described, this formulation may overlap with documented traditional knowledge. The combination of Neem and Turmeric for skin care is well-documented in Ayurvedic texts. A claim focused only on known properties or a traditional combination may need careful review under Section 3(p) of the Patents Act.',
-        relevantAreas: ['Patent', 'Traditional Knowledge', 'Formulation', 'India'],
-        evidence: [
-          {
-            id: 'patents-act-1970-section-3p',
-            title: 'Patents Act, 1970 — Section 3(p)',
-            subtitle: 'Indian Patent Law · Section reference',
-            type: 'Primary Legal Source',
-            jurisdiction: 'India',
-            url: '/sources/patents-act-1970/section-3-p'
-          },
-          {
-            id: 'tkdl',
-            title: 'Traditional Knowledge Digital Library',
-            subtitle: 'Traditional Knowledge · Relevant reference',
-            type: 'Traditional Knowledge',
-            jurisdiction: 'International',
-            url: '/sources/tkdl'
-          }
-        ],
-        confidence: 'Moderate',
-        formulationClassification: {
-          classification: 'Ayurvedic botanical preparation',
-          confidence: 'High',
-          detectedType: 'Ayurveda',
-          reason: 'Based on ingredient composition and traditional preparation methods'
-        },
-        biologicalResources: ['Neem (Azadirachta indica)', 'Turmeric (Curcuma longa)'],
-        traditionalKnowledgeIndicators: 'The ingredients Neem and Turmeric are extensively documented in Ayurvedic texts for skin care applications. This formulation may overlap with existing traditional knowledge records.',
-        absRelevance: {
-          status: 'Potentially relevant',
-          reason: 'The formulation involves biological resources that may require ABS compliance assessment',
-          legalSource: 'Biological Diversity Act, 2002',
-          evidenceLink: '/sources/biological-diversity-act'
-        },
-        priorArt: [
-          {
-            id: 'prior-art-1',
-            title: 'Herbal composition for topical skin care',
-            patentNumber: 'IN202312345678',
-            publicationDate: '2023-06-15',
-            jurisdiction: 'India',
-            similarity: 78,
-            matchingFeatures: ['botanical combination', 'topical use', 'skin care'],
-            url: '/sources/patent-in202312345678'
-          }
-        ],
-        legalProvisions: [
-          {
-            id: 'legal-1',
-            title: 'Patents Act, 1970',
-            section: 'Section 3(p)',
-            explanation: 'Excludes mere discovery of new form of known substance without enhanced efficacy',
-            url: '/sources/patents-act-1970/section-3-p'
-          },
-          {
-            id: 'legal-2',
-            title: 'Biological Diversity Act, 2002',
-            section: 'Section 3',
-            explanation: 'Regulates access to biological resources and associated traditional knowledge',
-            url: '/sources/biological-diversity-act/section-3'
-          }
-        ]
-      }
+  // Map backend AskResponse to frontend AIResponse format
+  const mapAskResponseToAIResponse = (backendResponse: AskResponse): AIResponse => {
+    const evidence: EvidenceItem[] = backendResponse.citations.map((citation, idx) => ({
+      id: `citation-${idx}`,
+      title: citation.document,
+      subtitle: `${citation.source}${citation.section ? ` · ${citation.section}` : ''}`,
+      type: 'Legal Source',
+      jurisdiction: 'India',
+      url: `/sources/${citation.chunk_id}`
+    }))
+
+    const confidenceMap: Record<string, 'High' | 'Moderate' | 'Low' | 'Insufficient'> = {
+      'high': 'High',
+      'medium': 'Moderate',
+      'low': 'Low',
     }
-    
+
     return {
-      preliminaryFinding: 'Traditional knowledge may be relevant to patentability.',
-      explanation: 'Based on the ingredients and intended use described, this may overlap with documented traditional knowledge. A claim focused only on known properties or a traditional combination may need careful review under Section 3(p) of the Patents Act.',
-      relevantAreas: ['Patent', 'Traditional Knowledge', 'India'],
-      evidence: [
-        {
-          id: 'patents-act-1970-section-3p',
-          title: 'Patents Act, 1970 — Section 3(p)',
-          subtitle: 'Indian Patent Law · Section reference',
-          type: 'Primary Legal Source',
-          jurisdiction: 'India',
-          url: '/sources/patents-act-1970/section-3-p'
-        },
-        {
-          id: 'tkdl',
-          title: 'Traditional Knowledge Digital Library',
-          subtitle: 'Traditional Knowledge · Relevant reference',
-          type: 'Traditional Knowledge',
-          jurisdiction: 'International',
-          url: '/sources/tkdl'
-        }
-      ],
-      confidence: 'Moderate'
+      preliminaryFinding: backendResponse.primary_ip || 'No specific IP type detected',
+      explanation: backendResponse.answer,
+      relevantAreas: backendResponse.ip_types,
+      evidence,
+      confidence: confidenceMap[backendResponse.confidence] || 'Moderate',
+      formulationClassification: backendResponse.formulation ? {
+        classification: backendResponse.formulation.formulation_type,
+        confidence: `${Math.round(backendResponse.formulation.confidence * 100)}%`,
+        detectedType: backendResponse.formulation.formulation_type,
+        reason: backendResponse.formulation.notes
+      } : undefined,
+      biologicalResources: backendResponse.formulation?.biological_resources,
+      traditionalKnowledgeIndicators: backendResponse.formulation?.traditional_knowledge_indicators.length 
+        ? `Detected indicators: ${backendResponse.formulation.traditional_knowledge_indicators.join(', ')}`
+        : undefined
+    }
+  }
+
+  // Map backend FormulationAnalysisResponse to frontend AIResponse format
+  const mapFormulationResponseToAIResponse = (backendResponse: FormulationAnalysisResponse): AIResponse => {
+    const evidence: EvidenceItem[] = [
+      ...backendResponse.legal_provisions.map((provision, idx) => ({
+        id: `legal-${idx}`,
+        title: provision.document,
+        subtitle: `${provision.source}${provision.section ? ` · ${provision.section}` : ''}`,
+        type: 'Legal Source',
+        jurisdiction: 'India',
+        url: `/sources/${provision.chunk_id}`
+      })),
+      ...backendResponse.tk_results.matches.map((match, idx) => ({
+        id: `tk-${idx}`,
+        title: match.title,
+        subtitle: `${match.source} · Score: ${match.score.toFixed(2)}`,
+        type: 'Traditional Knowledge',
+        jurisdiction: 'India',
+        url: `/sources/tk-${idx}`
+      }))
+    ]
+
+    const priorArt: PriorArtItem[] = backendResponse.patent_results.map((patent, idx) => ({
+      id: `patent-${idx}`,
+      title: patent.title,
+      patentNumber: patent.publication_number,
+      jurisdiction: 'India',
+      similarity: Math.round(patent.similarity_score * 100),
+      matchingFeatures: patent.matched_components,
+      url: `/sources/patent-${idx}`
+    }))
+
+    const legalProvisions: LegalProvision[] = backendResponse.legal_provisions.map((provision, idx) => ({
+      id: `legal-prov-${idx}`,
+      title: provision.document,
+      section: provision.section || 'N/A',
+      explanation: 'Relevant provision for this formulation',
+      url: `/sources/${provision.chunk_id}`
+    }))
+
+    const confidenceMap: Record<string, 'High' | 'Moderate' | 'Low' | 'Insufficient'> = {
+      'high': 'High',
+      'medium': 'Moderate',
+      'low': 'Low',
+    }
+
+    return {
+      preliminaryFinding: backendResponse.classification.formulation_type,
+      explanation: backendResponse.report,
+      relevantAreas: ['Patent', 'Traditional Knowledge', 'Formulation', 'India'],
+      evidence,
+      confidence: confidenceMap[backendResponse.confidence] || 'Moderate',
+      formulationClassification: {
+        classification: backendResponse.classification.formulation_type,
+        confidence: `${Math.round(backendResponse.classification.confidence * 100)}%`,
+        detectedType: backendResponse.classification.formulation_type,
+        reason: backendResponse.classification.notes
+      },
+      biologicalResources: backendResponse.classification.biological_resources,
+      traditionalKnowledgeIndicators: backendResponse.classification.traditional_knowledge_indicators.length
+        ? `Detected indicators: ${backendResponse.classification.traditional_knowledge_indicators.join(', ')}`
+        : undefined,
+      absRelevance: {
+        status: backendResponse.abs_assessment.potentially_relevant ? 'Potentially relevant' : 'Not relevant',
+        reason: backendResponse.abs_assessment.reasons.join('; '),
+        legalSource: backendResponse.abs_assessment.relevant_sources.join(', ')
+      },
+      priorArt,
+      legalProvisions
     }
   }
 
   // Initialize conversation from sessionStorage
   useEffect(() => {
-    try {
-      const storedQuestion = sessionStorage.getItem(`chat:${chatId}:q`)
-      const storedFormulation = sessionStorage.getItem(`chat:${chatId}:formulation`)
-      const chatType = sessionStorage.getItem(`chat:${chatId}:type`)
+    const initializeChat = async () => {
+      // Prevent duplicate initialization
+      if (isInitialized) return
       
-      if (storedQuestion) {
-        // Check if this is a formulation analysis
-        if (chatType === 'formulation' && storedFormulation) {
-          const formulation = JSON.parse(storedFormulation)
-          setFormulationData(formulation)
-          setIsFormulationAnalysis(true)
-          setChatTitle(formulation.name || 'Formulation Analysis')
-          
-          const initialMessage: Message = {
-            id: 'initial',
-            role: 'user',
-            content: `Analyze formulation: ${formulation.name}`,
-            createdAt: new Date()
-          }
-          setMessages([initialMessage])
-          
-          // Generate formulation analysis response
-          setTimeout(() => {
-            const aiResponse: Message = {
-              id: 'initial-response',
-              role: 'assistant',
-              content: '',
-              response: generateMockResponse(formulation.name, true),
+      try {
+        const storedQuestion = sessionStorage.getItem(`chat:${chatId}:q`)
+        const storedFormulation = sessionStorage.getItem(`chat:${chatId}:formulation`)
+        const chatType = sessionStorage.getItem(`chat:${chatId}:type`)
+        
+        if (storedQuestion) {
+          // Check if this is a formulation analysis
+          if (chatType === 'formulation' && storedFormulation) {
+            const formulation = JSON.parse(storedFormulation)
+            setFormulationData(formulation)
+            setIsFormulationAnalysis(true)
+            setChatTitle(formulation.name || 'Formulation Analysis')
+            
+            const initialMessage: Message = {
+              id: 'initial',
+              role: 'user',
+              content: `Analyze formulation: ${formulation.name}`,
               createdAt: new Date()
             }
-            setMessages(prev => [...prev, aiResponse])
-          }, 500)
-        } else {
-          // Regular question flow
-          setChatTitle('IP Research Chat')
-          const initialMessage: Message = {
-            id: 'initial',
-            role: 'user',
-            content: storedQuestion,
-            createdAt: new Date()
-          }
-          setMessages([initialMessage])
-          
-          // Generate initial AI response
-          setTimeout(() => {
-            const aiResponse: Message = {
-              id: 'initial-response',
-              role: 'assistant',
-              content: '',
-              response: generateMockResponse(storedQuestion),
+            setMessages([initialMessage])
+            
+            // Call backend API for formulation analysis
+            setLoadingState('loading')
+            try {
+              const description = `${formulation.name}. Ingredients: ${formulation.ingredients.join(', ')}. Intended use: ${formulation.intendedUse}${formulation.preparationProcess ? `. Preparation: ${formulation.preparationProcess}` : ''}${formulation.traditionalUse ? `. Traditional use: ${formulation.traditionalUse}` : ''}`
+              
+              const backendResponse = await apiClient.analyzeFormulation({ description })
+              const aiResponse: Message = {
+                id: 'initial-response',
+                role: 'assistant',
+                content: '',
+                response: mapFormulationResponseToAIResponse(backendResponse),
+                createdAt: new Date()
+              }
+              
+              // Prevent duplicate messages
+              setMessages(prev => {
+                if (prev.some(msg => msg.id === 'initial-response')) {
+                  console.warn('Prevented duplicate initial-response')
+                  return prev
+                }
+                return [...prev, aiResponse]
+              })
+            } catch (error) {
+              console.error('Formulation analysis error:', error)
+              if (error instanceof APIError) {
+                setApiError(error.message)
+              } else {
+                setApiError('Failed to analyze formulation. Please try again.')
+              }
+              setLoadingState('error')
+            } finally {
+              setLoadingState('idle')
+            }
+          } else {
+            // Regular question flow
+            setChatTitle('IP Research Chat')
+            const initialMessage: Message = {
+              id: 'initial',
+              role: 'user',
+              content: storedQuestion,
               createdAt: new Date()
             }
-            setMessages(prev => [...prev, aiResponse])
-          }, 500)
+            setMessages([initialMessage])
+            
+            // Call backend API for general query
+            setLoadingState('loading')
+            try {
+              const backendResponse = await apiClient.ask({ query: storedQuestion })
+              const aiResponse: Message = {
+                id: 'initial-response',
+                role: 'assistant',
+                content: '',
+                response: mapAskResponseToAIResponse(backendResponse),
+                createdAt: new Date()
+              }
+              
+              // Prevent duplicate messages
+              setMessages(prev => {
+                if (prev.some(msg => msg.id === 'initial-response')) {
+                  console.warn('Prevented duplicate initial-response')
+                  return prev
+                }
+                return [...prev, aiResponse]
+              })
+              
+              if (!backendResponse.sufficient) {
+                setLoadingState('insufficient')
+              }
+            } catch (error) {
+              console.error('Query error:', error)
+              if (error instanceof APIError) {
+                setApiError(error.message)
+              } else {
+                setApiError('Failed to process your question. Please try again.')
+              }
+              setLoadingState('error')
+            } finally {
+              setLoadingState('idle')
+            }
+          }
         }
+      } catch (error) {
+        console.error('Chat initialization error:', error)
+        setMessages([])
+      } finally {
+        setIsInitialized(true)
       }
-    } catch {
-      setMessages([])
     }
-  }, [chatId])
+    
+    initializeChat()
+  }, [chatId, isInitialized])
 
   // Update current time periodically for relative timestamps
   useEffect(() => {
@@ -462,11 +532,15 @@ export default function ChatPage() {
   }, [])
 
   const copyResponse = useCallback((response: AIResponse) => {
-    const textToCopy = `${response.preliminaryFinding}\n\n${response.explanation}\n\nRelevant areas: ${response.relevantAreas.join(', ')}\n\nEvidence used:\n${response.evidence.map(e => `- ${e.title}`).join('\n')}\n\nEvidence confidence: ${response.confidence}\n\nAnvashai provides source-grounded informational assistance and does not constitute legal advice.`
+    const evidenceText = response.evidence.map((e, idx) => 
+      `${idx + 1}. ${e.title}\n   ${e.subtitle}\n   Type: ${e.type}, Jurisdiction: ${e.jurisdiction}`
+    ).join('\n\n')
+    
+    const textToCopy = `${response.preliminaryFinding}\n\n${response.explanation}\n\nRelevant areas: ${response.relevantAreas.join(', ')}\n\nEvidence used:\n\n${evidenceText}\n\nEvidence confidence: ${response.confidence}\n\nAnvashai provides source-grounded informational assistance and does not constitute legal advice.`
     
     navigator.clipboard.writeText(textToCopy).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      setResponseCopied(true)
+      setTimeout(() => setResponseCopied(false), 2000)
     }).catch(() => {
       alert('Failed to copy to clipboard. Please try again.')
     })
@@ -487,7 +561,7 @@ export default function ChatPage() {
     router.push(`/review?chatId=${chatId}`)
   }, [messages, chatId, router])
 
-  const handleFollowUpSubmit = useCallback(() => {
+  const handleFollowUpSubmit = useCallback(async () => {
     const q = followUp.trim()
     if (!q) return
     
@@ -502,23 +576,47 @@ export default function ChatPage() {
     setFollowUp('')
     setLoadingState('loading')
     
-    // Simulate API call - in real implementation, call backend
-    setTimeout(() => {
+    try {
+      // Call backend API
+      const backendResponse = await apiClient.ask({ query: q })
+      const aiResponseId = `ai-${Date.now()}`
       const aiResponse: Message = {
-        id: `ai-${Date.now()}`,
+        id: aiResponseId,
         role: 'assistant',
         content: '',
-        response: generateMockResponse(q),
+        response: mapAskResponseToAIResponse(backendResponse),
         createdAt: new Date()
       }
-      setMessages(prev => [...prev, aiResponse])
-      setLoadingState('idle')
       
-      // Scroll to bottom
-      setTimeout(() => {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
-      }, 100)
-    }, 2000)
+      // Prevent duplicate messages by checking if we already have this response
+      setMessages(prev => {
+        if (prev.some(msg => msg.id === aiResponseId)) {
+          console.warn('Prevented duplicate message with id:', aiResponseId)
+          return prev
+        }
+        return [...prev, aiResponse]
+      })
+      setApiError(null)
+      
+      if (!backendResponse.sufficient) {
+        setLoadingState('insufficient')
+      }
+    } catch (error) {
+      console.error('Follow-up query error:', error)
+      if (error instanceof APIError) {
+        setApiError(error.message)
+      } else {
+        setApiError('Failed to process your question. Please try again.')
+      }
+      setLoadingState('error')
+    } finally {
+      setLoadingState('idle')
+    }
+    
+    // Scroll to bottom
+    setTimeout(() => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+    }, 100)
   }, [followUp])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -529,11 +627,13 @@ export default function ChatPage() {
   }
 
   const handleRetry = useCallback(() => {
-    setLoadingState('loading')
-    setTimeout(() => {
-      setLoadingState('idle')
-    }, 2000)
-  }, [])
+    // Retry the last user message
+    const lastUserMessage = messages.findLast(m => m.role === 'user')
+    if (lastUserMessage) {
+      setFollowUp(lastUserMessage.content)
+      handleFollowUpSubmit()
+    }
+  }, [messages, handleFollowUpSubmit])
 
   // Cleanup
   useEffect(() => {
@@ -687,9 +787,9 @@ export default function ChatPage() {
                     </div>
 
                     {/* Explanation */}
-                    <p className="text-sm leading-relaxed text-muted-foreground">
+                    <div className="text-sm leading-relaxed text-foreground prose prose-sm max-w-none">
                       {message.response.explanation}
-                    </p>
+                    </div>
 
                     {/* Formulation Classification */}
                     {message.response.formulationClassification && (
@@ -888,27 +988,67 @@ export default function ChatPage() {
                       </div>
                     )}
 
-                    {/* Evidence used - Clickable citations */}
+                    {/* Evidence used - Professional citation format */}
                     <div>
                       <h3 className="mb-3 text-sm font-medium text-foreground">Evidence used</h3>
-                      <div className="space-y-2">
-                        {message.response.evidence.map((item) => (
-                          <button
-                            key={item.id}
-                            onClick={() => router.push(item.url)}
-                            className="group flex w-full items-center justify-between rounded-lg border border-border/50 bg-muted/30 px-4 py-3 text-left transition-colors hover:bg-muted/50"
-                          >
-                            <div>
-                              <p className="text-sm font-medium text-foreground group-hover:text-primary">
-                                {item.title}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {item.subtitle}
-                              </p>
+                      <div className="rounded-lg border border-border/50 bg-muted/20 p-4">
+                        <div className="space-y-3">
+                          {message.response.evidence.map((item, idx) => (
+                            <div key={item.id} className="flex items-start gap-3">
+                              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+                                {idx + 1}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium text-foreground">
+                                      {item.title}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                      {item.subtitle}
+                                    </p>
+                                    <div className="flex items-center gap-2 mt-1.5">
+                                      <span className="inline-flex items-center rounded-full border border-border/50 bg-muted/50 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                        {item.type}
+                                      </span>
+                                      <span className="inline-flex items-center rounded-full border border-border/50 bg-muted/50 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                        {item.jurisdiction}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                      onClick={() => {
+                                        const citationText = `${item.title} - ${item.subtitle} (${item.type}, ${item.jurisdiction})`
+                                        navigator.clipboard.writeText(citationText).then(() => {
+                                          setCopiedEvidenceId(item.id)
+                                          setTimeout(() => setCopiedEvidenceId(null), 2000)
+                                        })
+                                      }}
+                                      className="flex size-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                      aria-label="Copy citation"
+                                      title="Copy citation"
+                                    >
+                                      {copiedEvidenceId === item.id ? (
+                                        <Check className="size-3.5 text-emerald-500" />
+                                      ) : (
+                                        <Copy className="size-3.5" />
+                                      )}
+                                    </button>
+                                    <button
+                                      onClick={() => router.push(item.url)}
+                                      className="flex size-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
+                                      aria-label={`View ${item.title}`}
+                                      title="View source"
+                                    >
+                                      <ExternalLink className="size-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                            <ExternalLink className="size-4 text-muted-foreground group-hover:text-primary" />
-                          </button>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     </div>
 
@@ -975,7 +1115,7 @@ export default function ChatPage() {
                         className="gap-2"
                         onClick={() => copyResponse(message.response!)}
                       >
-                        {copied ? (
+                        {responseCopied ? (
                           <>
                             <Check className="size-4" />
                             Copied
@@ -1014,22 +1154,13 @@ export default function ChatPage() {
         )}
 
         {/* Error State */}
-        {loadingState === 'error' && (
-          <div className="mb-8 rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-            <div className="flex items-center gap-2 text-destructive">
-              <AlertCircle className="size-4" />
-              <p className="text-sm font-medium">Unable to generate the response right now.</p>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">Please try again.</p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-3 gap-2"
-              onClick={handleRetry}
-            >
-              <RotateCcw className="size-4" />
-              Retry
-            </Button>
+        {loadingState === 'error' && apiError && (
+          <div className="mb-8">
+            <ErrorDisplay
+              error={apiError}
+              onRetry={handleRetry}
+              onDismiss={() => setApiError(null)}
+            />
           </div>
         )}
 

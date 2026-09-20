@@ -121,7 +121,7 @@ export default function AskPage() {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SpeechRecognition) {
       setIsSpeechSupported(false)
-      setMicError('Speech recognition is not supported in this browser')
+      setMicError('Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.')
     }
   }, [])
 
@@ -175,19 +175,19 @@ export default function AskPage() {
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error)
-      
+
       if (event.error === 'not-allowed') {
-        setMicError('Microphone access denied. Please allow microphone access in your browser settings.')
+        setMicError('Please allow microphone access when prompted by your browser. Click the microphone button again after allowing access.')
       } else if (event.error === 'no-speech') {
-        setMicError('No speech detected. Please try again.')
+        setMicError('No speech detected. Please try speaking louder or closer to the microphone.')
       } else if (event.error === 'audio-capture') {
-        setMicError('No microphone found. Please connect a microphone.')
+        setMicError('No microphone found. Please connect a microphone and try again.')
       } else if (event.error === 'network') {
         setMicError('Network error. Please check your connection.')
       } else {
-        setMicError(`Error: ${event.error}`)
+        setMicError(`Error: ${event.error}. Please try again.`)
       }
-      
+
       setIsRecording(false)
       isRecordingRef.current = false
       if (recordingTimerRef.current) {
@@ -243,18 +243,24 @@ export default function AskPage() {
       return
     }
 
-    // Start recording — let SpeechRecognition request mic permission natively
+    // Start recording — let SpeechRecognition handle permission natively
     try {
+      setMicError(null)
       recognitionRef.current = initSpeechRecognition()
       if (!recognitionRef.current) {
         setMicError('Failed to initialize speech recognition')
         return
       }
-      setMicError(null)
       recognitionRef.current.start()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error starting speech recognition:', error)
-      setMicError('Failed to start voice recording. Please try again.')
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        setMicError('Please allow microphone access when prompted by your browser. Click the microphone button again after allowing access.')
+      } else if (error.name === 'NotFoundError') {
+        setMicError('No microphone found. Please connect a microphone and try again.')
+      } else {
+        setMicError('Failed to start voice recording. Please try again.')
+      }
       setIsRecording(false)
       isRecordingRef.current = false
     }
@@ -387,20 +393,22 @@ export default function AskPage() {
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0 select-none">
         <div className="absolute bottom-0 left-0 h-[420px] w-[300px] opacity-[0.18] dark:opacity-[0.08] md:h-[420px] md:w-[300px] lg:h-[480px] lg:w-[340px] hidden sm:block">
           <Image
-            src="/image/ask/ask_bg.png"
+            src="/ask/ask_bg.png"
             alt=""
             fill
             sizes="300px"
+            loading="eager"
             className="object-cover object-[15%_bottom]"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent to-background" />
         </div>
         <div className="absolute bottom-0 right-0 h-[480px] w-[340px] opacity-[0.15] dark:opacity-[0.07] md:h-[480px] md:w-[340px] hidden sm:block">
           <Image
-            src="/image/ask/ask_bg.png"
+            src="/ask/ask_bg.png"
             alt=""
             fill
             sizes="340px"
+            loading="eager"
             className="object-cover object-[85%_bottom]"
           />
           <div className="absolute inset-0 bg-gradient-to-l from-transparent to-background" />
@@ -408,20 +416,20 @@ export default function AskPage() {
       </div>
 
       {/* ── CONTENT ────────────────────────────────────────── */}
-      <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-6 sm:px-6 sm:py-10 md:px-6 md:py-16">
+      <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-3 sm:px-6 sm:py-4 md:px-6 md:py-6">
         {/* heading */}
-        <div className="mb-6 text-center sm:mb-8 md:mb-10">
-          <div aria-hidden className="mx-auto mb-4 h-1 w-8 rounded-full bg-primary sm:mb-5 sm:w-10" />
-          <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground sm:mb-3 sm:text-3xl md:text-4xl">
+        <div className="mb-3 text-center sm:mb-4 md:mb-5">
+          <div aria-hidden className="mx-auto mb-2 h-0.5 w-6 rounded-full bg-primary sm:mb-3 sm:h-1 sm:w-8" />
+          <h1 className="mb-1 text-lg font-bold tracking-tight text-foreground sm:mb-2 sm:text-xl md:text-2xl">
             {t('home.ask.heading')}
           </h1>
-          <p className="mx-auto max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base md:text-lg">
+          <p className="mx-auto max-w-xl text-xs leading-relaxed text-muted-foreground sm:text-sm md:text-base">
             {t('home.ask.subheading')}
           </p>
         </div>
 
         {/* input card */}
-        <div className="mb-6 rounded-2xl border border-border bg-card shadow-lg shadow-primary/5 sm:mb-8">
+        <div className="mb-4 rounded-2xl border border-border bg-card shadow-lg shadow-primary/5 sm:mb-6">
           <textarea
             ref={textareaRef}
             value={question}
@@ -433,8 +441,8 @@ export default function AskPage() {
             }}
             onKeyDown={handleKeyDown}
             placeholder={t('home.ask.placeholder')}
-            rows={4}
-            className="w-full resize-none rounded-t-2xl bg-transparent px-4 pt-4 pb-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none sm:px-5 sm:pt-5 sm:text-base"
+            rows={3}
+            className="w-full resize-none rounded-t-2xl bg-transparent px-3 pt-3 pb-2 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none sm:px-4 sm:pt-4 sm:pb-2 sm:text-sm sm:rows-4"
             aria-label={t('home.ask.placeholder')}
             maxLength={MAX_CHARS}
           />
@@ -531,6 +539,11 @@ export default function AskPage() {
                       {formatTime(recordingTime)}
                     </span>
                     <span className="text-muted-foreground hidden sm:inline">Recording...</span>
+                  </div>
+                )}
+                {!isSpeechSupported && (
+                  <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-background border border-border px-2 py-1 text-xs shadow-lg max-w-[200px] text-center">
+                    Use Chrome/Edge/Safari
                   </div>
                 )}
               </div>
@@ -637,27 +650,27 @@ export default function AskPage() {
 
         {/* suggestions */}
         <div className="mb-auto">
-          <p className="mb-3 text-center text-[10px] font-medium uppercase tracking-widest text-muted-foreground sm:mb-4 sm:text-xs">
+          <p className="mb-2 text-center text-[8px] font-medium uppercase tracking-widest text-muted-foreground sm:mb-3 sm:text-[10px]">
             {t('home.ask.tryAsking')}
           </p>
-          <div className="grid gap-2 sm:gap-3 sm:grid-cols-3">
+          <div className="grid gap-1.5 grid-cols-2 sm:gap-2 sm:grid-cols-3">
             {SUGGESTIONS.map(({ key, Icon, color, iconBg }) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => fillSuggestion(t(`home.ask.${key}`))}
-                className={`group flex items-start gap-2 rounded-xl border p-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-md sm:gap-3 sm:p-4 ${color}`}
+                className={`group flex items-start gap-1.5 rounded-xl border p-2 text-left transition-all hover:-translate-y-0.5 hover:shadow-md sm:gap-2 sm:p-3 ${color}`}
               >
                 <span
-                  className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${iconBg} sm:size-9`}
+                  className={`flex size-5 shrink-0 items-center justify-center rounded-lg ${iconBg} sm:size-6`}
                 >
-                  <Icon className="size-3.5 aria-hidden sm:size-4" />
+                  <Icon className="size-2.5 aria-hidden sm:size-3" />
                 </span>
-                <p className="flex-1 text-[11px] leading-relaxed text-foreground sm:text-xs">
+                <p className="flex-1 text-[9px] leading-relaxed text-foreground sm:text-[10px]">
                   {t(`home.ask.${key}`)}
                 </p>
                 <ArrowRight
-                  className="mt-0.5 size-3 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 sm:size-3.5"
+                  className="mt-0.5 size-2 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 sm:size-2.5"
                   aria-hidden
                 />
               </button>
@@ -666,11 +679,11 @@ export default function AskPage() {
         </div>
 
         {/* footer tagline */}
-        <p className="mt-8 text-center text-[8px] font-medium uppercase tracking-[0.2em] text-muted-foreground/60 sm:mt-12 sm:text-[10px] sm:tracking-[0.3em]">
+        <p className="mt-4 text-center text-[7px] font-medium uppercase tracking-[0.15em] text-muted-foreground/60 sm:mt-6 sm:text-[8px] sm:tracking-[0.2em] md:mt-8 md:text-[10px] md:tracking-[0.3em]">
           {t('home.ask.footerKnowledge')}
-          <span className="mx-2 sm:mx-3">|</span>
+          <span className="mx-1.5 sm:mx-2 md:mx-3">|</span>
           {t('home.ask.footerInnovation')}
-          <span className="mx-2 sm:mx-3">|</span>
+          <span className="mx-1.5 sm:mx-2 md:mx-3">|</span>
           {t('home.ask.footerStatement')}
         </p>
       </div>

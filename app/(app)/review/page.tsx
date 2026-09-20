@@ -188,7 +188,7 @@ function ReviewPageContent() {
   return (
     <main className="flex min-h-[calc(100vh-56px)] flex-col bg-background">
       {/* Page Header */}
-      <div className="border-b border-border bg-background/95 px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8">
+      <div className="border-b border-border bg-background/95 px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-5">
         <div className="mx-auto max-w-2xl">
           <div className="mb-1.5 sm:mb-2">
             <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary sm:px-3 sm:py-1 sm:text-xs sm:tracking-[0.25em]">
@@ -198,28 +198,28 @@ function ReviewPageContent() {
           </div>
           {pageState === 'form' ? (
             <>
-              <h1 className="text-xl font-bold text-foreground sm:text-2xl md:text-3xl lg:text-4xl">
+              <h1 className="text-lg font-bold text-foreground sm:text-xl md:text-2xl">
                 Need expert assistance?
               </h1>
-              <p className="mt-2 text-xs text-muted-foreground sm:mt-3 sm:text-sm md:text-base">
+              <p className="mt-1 text-xs text-muted-foreground sm:mt-2 sm:text-sm md:text-base">
                 The available evidence may not be sufficient for a reliable answer. You can request review by an IP facilitator.
               </p>
             </>
           ) : pageState === 'success' ? (
             <>
-              <h1 className="text-xl font-bold text-foreground sm:text-2xl md:text-3xl lg:text-4xl">
+              <h1 className="text-lg font-bold text-foreground sm:text-xl md:text-2xl">
                 Review request submitted
               </h1>
-              <p className="mt-2 text-xs text-muted-foreground sm:mt-3 sm:text-sm md:text-base">
+              <p className="mt-1 text-xs text-muted-foreground sm:mt-2 sm:text-sm md:text-base">
                 An IP facilitator will review the available evidence and follow up with guidance.
               </p>
             </>
           ) : (
             <>
-              <h1 className="text-xl font-bold text-foreground sm:text-2xl md:text-3xl lg:text-4xl">
+              <h1 className="text-lg font-bold text-foreground sm:text-xl md:text-2xl">
                 Request review
               </h1>
-              <p className="mt-2 text-xs text-muted-foreground sm:mt-3 sm:text-sm md:text-base">
+              <p className="mt-1 text-xs text-muted-foreground sm:mt-2 sm:text-sm md:text-base">
                 Submit your request for expert IP facilitator review.
               </p>
             </>
@@ -228,7 +228,7 @@ function ReviewPageContent() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8">
+      <div className="flex-1 px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-6">
         <div className="mx-auto max-w-2xl">
           {/* Form State */}
           {pageState === 'form' && (
@@ -456,10 +456,10 @@ function ReviewPageContent() {
       </div>
 
       {/* Footer Disclaimer */}
-      <div className="border-t border-border/40 px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-6">
+      <div className="border-t border-border/40 px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4">
         <div className="mx-auto max-w-2xl">
-          <div className="flex items-center gap-2 text-[10px] text-muted-foreground/70 sm:text-xs">
-            <Shield className="size-3 sm:size-4" />
+          <div className="flex items-center gap-2 text-[9px] text-muted-foreground/70 sm:text-[10px]">
+            <Shield className="size-2.5 sm:size-3" />
             <span className="leading-relaxed">
               Information provided by Anvashai is for general informational purposes only and does not constitute legal advice.
             </span>

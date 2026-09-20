@@ -18,6 +18,8 @@ import {
   ChevronDown,
   Check
 } from 'lucide-react'
+import { apiClient, APIError } from '@/lib/api-client'
+import { ErrorDisplay } from '@/components/ui/error-display'
 
 const FORMULATION_TYPES = [
   'Ayurveda',
@@ -69,6 +71,7 @@ export default function AnalysisPage() {
   const [selectedLanguage, setSelectedLanguage] = useState('en')
   const [isSpeechSupported, setIsSpeechSupported] = useState(true)
   const [showLanguagePicker, setShowLanguagePicker] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const recognitionRef = useRef<any>(null)
@@ -79,6 +82,7 @@ export default function AnalysisPage() {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SpeechRecognition) {
       setIsSpeechSupported(false)
+      setVoiceError('Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.')
     }
   }, [])
 
@@ -116,9 +120,15 @@ export default function AnalysisPage() {
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error)
       if (event.error === 'not-allowed') {
-        setVoiceError('Microphone access denied. Please allow microphone access.')
+        setVoiceError('Please allow microphone access when prompted by your browser. Click the microphone button again after allowing access.')
+      } else if (event.error === 'no-speech') {
+        setVoiceError('No speech detected. Please try speaking louder or closer to the microphone.')
+      } else if (event.error === 'audio-capture') {
+        setVoiceError('No microphone found. Please connect a microphone and try again.')
+      } else if (event.error === 'network') {
+        setVoiceError('Network error. Please check your connection.')
       } else {
-        setVoiceError(`Error: ${event.error}`)
+        setVoiceError(`Error: ${event.error}. Please try again.`)
       }
       setVoiceState('error')
       isRecordingRef.current = false
@@ -142,7 +152,7 @@ export default function AnalysisPage() {
 
   const toggleVoiceRecording = useCallback((field: keyof FormulationData) => {
     if (!isSpeechSupported) {
-      alert('Speech recognition is not supported in this browser.')
+      alert('Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.')
       return
     }
 
@@ -159,17 +169,24 @@ export default function AnalysisPage() {
     }
 
     setActiveVoiceField(field)
+    setVoiceError(null)
+
     try {
       recognitionRef.current = initSpeechRecognition()
       if (!recognitionRef.current) {
         setVoiceError('Failed to initialize speech recognition')
         return
       }
-      setVoiceError(null)
       recognitionRef.current.start()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error starting speech recognition:', error)
-      setVoiceError('Failed to start voice recording. Please try again.')
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        setVoiceError('Please allow microphone access when prompted by your browser. Click the microphone button again after allowing access.')
+      } else if (error.name === 'NotFoundError') {
+        setVoiceError('No microphone found. Please connect a microphone and try again.')
+      } else {
+        setVoiceError('Failed to start voice recording. Please try again.')
+      }
       setVoiceState('error')
     }
   }, [voiceState, isSpeechSupported, initSpeechRecognition])
@@ -265,15 +282,22 @@ export default function AnalysisPage() {
         console.error('Failed to store formulation data:', e)
       }
       
-      // Simulate API call - replace with actual backend call
-      // const response = await fetch('/api/formulation/analyze', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // })
+      // Call backend API to validate the formulation can be processed
+      const description = `${formData.name}. Ingredients: ${formData.ingredients.join(', ')}. Intended use: ${formData.intendedUse}${formData.preparationProcess ? `. Preparation: ${formData.preparationProcess}` : ''}${formData.traditionalUse ? `. Traditional use: ${formData.traditionalUse}` : ''}`
       
-      // Simulate delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      try {
+        await apiClient.analyzeFormulation({ description })
+        setApiError(null)
+      } catch (error) {
+        console.error('Formulation validation error:', error)
+        if (error instanceof APIError) {
+          setApiError(error.message)
+        } else {
+          setApiError('Failed to validate formulation. Please try again.')
+        }
+        setSubmitState('error')
+        return
+      }
       
       // Redirect to the chat page with the new chat ID
       router.push(`/ask/${chatId}`)
@@ -314,10 +338,10 @@ export default function AnalysisPage() {
   return (
     <main className="flex min-h-[calc(100vh-56px)] flex-col bg-background">
       {/* Page Header */}
-      <div className="border-b border-border bg-background/95 px-4 py-6 sm:px-6 sm:py-8 md:px-8">
+      <div className="border-b border-border bg-background/95 px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-5">
         <div className="mx-auto max-w-3xl">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground sm:text-xs sm:tracking-[0.25em]">
+          <div className="mb-1.5 flex items-center justify-between gap-2 sm:mb-2">
+            <span className="text-[8px] font-medium uppercase tracking-[0.15em] text-muted-foreground sm:text-[10px] sm:tracking-[0.2em] md:text-xs md:tracking-[0.25em]">
               FORMULATION WORKSPACE · INDIA
             </span>
             {/* Language Picker */}
@@ -326,15 +350,15 @@ export default function AnalysisPage() {
                 type="button"
                 aria-label="Select language"
                 onClick={() => setShowLanguagePicker(!showLanguagePicker)}
-                className="flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted sm:gap-1.5 sm:px-3 sm:py-1.5"
+                className="flex items-center gap-1 rounded-full border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium text-foreground transition-colors hover:bg-muted sm:gap-1.5 sm:px-2 sm:py-1 sm:text-xs"
               >
-                <Languages className="size-2.5 sm:size-3" />
+                <Languages className="size-2 sm:size-2.5" />
                 <span className="hidden sm:inline">{getLanguageName(selectedLanguage)}</span>
                 <span className="sm:hidden">{selectedLanguage.toUpperCase()}</span>
-                <ChevronDown className="size-2.5 text-muted-foreground sm:size-3" />
+                <ChevronDown className="size-2 text-muted-foreground sm:size-2.5" />
               </button>
               {showLanguagePicker && (
-                <div className="absolute right-0 top-full mt-1 max-h-60 w-44 overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-lg z-50 sm:w-48">
+                <div className="absolute right-0 top-full mt-1 max-h-60 w-36 overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-lg z-50 sm:w-44">
                   {LANGUAGES.map((lang) => (
                     <button
                       key={lang.code}
@@ -343,7 +367,7 @@ export default function AnalysisPage() {
                         setSelectedLanguage(lang.code)
                         setShowLanguagePicker(false)
                       }}
-                      className={`flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-muted sm:px-3 sm:py-2 ${
+                      className={`flex w-full items-center justify-between rounded-md px-2 py-1 text-xs hover:bg-muted sm:px-2 sm:py-1.5 sm:text-sm ${
                         selectedLanguage === lang.code
                           ? 'bg-muted text-foreground'
                           : 'text-muted-foreground'
@@ -351,7 +375,7 @@ export default function AnalysisPage() {
                     >
                       <span>{lang.name}</span>
                       {selectedLanguage === lang.code && (
-                        <Check className="size-3" />
+                        <Check className="size-2.5 sm:size-3" />
                       )}
                     </button>
                   ))}
@@ -359,23 +383,23 @@ export default function AnalysisPage() {
               )}
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-foreground sm:text-3xl md:text-4xl">
+          <h1 className="text-lg font-bold text-foreground sm:text-xl md:text-2xl">
             Tell us about your formulation
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground sm:mt-3 sm:text-base">
+          <p className="mt-1 text-xs text-muted-foreground sm:mt-2 sm:text-sm md:text-base">
             Share what you know. Sahayak will organize the evidence and identify what needs a closer look.
           </p>
         </div>
       </div>
 
       {/* Form Container */}
-      <div className="flex-1 px-4 py-6 sm:px-6 sm:py-8 md:px-8">
+      <div className="flex-1 px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-6">
         <div className="mx-auto max-w-3xl">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6 md:p-8">
+          <div className="rounded-xl border border-border bg-card p-3 shadow-sm sm:p-4 md:p-6">
             
             {/* Formulation Name */}
-            <div className="mb-4 sm:mb-6">
-              <label htmlFor="formulation-name" className="mb-2 block text-sm font-medium text-foreground">
+            <div className="mb-3 sm:mb-4">
+              <label htmlFor="formulation-name" className="mb-1 block text-xs font-medium text-foreground sm:mb-2 sm:text-sm">
                 Formulation name <span className="text-destructive">*</span>
               </label>
               <Input
@@ -385,23 +409,23 @@ export default function AnalysisPage() {
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 aria-required="true"
-                className="text-sm"
+                className="text-xs sm:text-sm"
               />
               {validationErrors.name && (
-                <p className="mt-1 text-xs text-destructive">{validationErrors.name}</p>
+                <p className="mt-1 text-[10px] text-destructive sm:text-xs">{validationErrors.name}</p>
               )}
             </div>
 
             {/* Formulation Type */}
-            <div className="mb-4 sm:mb-6">
-              <label htmlFor="formulation-type" className="mb-2 block text-sm font-medium text-foreground">
+            <div className="mb-3 sm:mb-4">
+              <label htmlFor="formulation-type" className="mb-1 block text-xs font-medium text-foreground sm:mb-2 sm:text-sm">
                 Formulation type (optional)
               </label>
               <select
                 id="formulation-type"
                 value={formData.formulationType}
                 onChange={(e) => setFormData(prev => ({ ...prev, formulationType: e.target.value }))}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 sm:px-4 sm:py-3"
+                className="w-full rounded-lg border border-border bg-background px-2.5 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 sm:px-3 sm:py-2.5 sm:text-sm"
               >
                 <option value="">Select type...</option>
                 {FORMULATION_TYPES.map(type => (
@@ -411,11 +435,11 @@ export default function AnalysisPage() {
             </div>
 
             {/* Ingredients */}
-            <div className="mb-4 sm:mb-6">
-              <label htmlFor="ingredient-input" className="mb-2 block text-sm font-medium text-foreground">
+            <div className="mb-3 sm:mb-4">
+              <label htmlFor="ingredient-input" className="mb-1 block text-xs font-medium text-foreground sm:mb-2 sm:text-sm">
                 Ingredients <span className="text-destructive">*</span>
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 sm:gap-2">
                 <Input
                   id="ingredient-input"
                   type="text"
@@ -429,36 +453,36 @@ export default function AnalysisPage() {
                     }
                   }}
                   aria-label="Add ingredient"
-                  className="flex-1 text-sm"
+                  className="flex-1 text-xs sm:text-sm"
                 />
                 <Button
                   type="button"
                   onClick={addIngredient}
                   variant="outline"
-                  className="gap-2 px-3 sm:px-4"
+                  className="gap-1.5 px-2 sm:gap-2 sm:px-3"
                   size="sm"
                 >
-                  <Plus className="size-3.5 sm:size-4" />
+                  <Plus className="size-3 sm:size-3.5" />
                   <span className="hidden sm:inline">Add</span>
                 </Button>
               </div>
 
               {/* Ingredient Chips */}
               {formData.ingredients.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-2 flex flex-wrap gap-1.5 sm:mt-3 sm:gap-2">
                   {formData.ingredients.map((ingredient, index) => (
                     <span
                       key={index}
-                      className="flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-2.5 py-1 text-xs font-medium text-foreground sm:px-3 sm:py-1.5 sm:text-sm"
+                      className="flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2 py-0.5 text-[10px] font-medium text-foreground sm:px-2.5 sm:py-1 sm:text-xs"
                     >
                       {ingredient}
                       <button
                         type="button"
                         onClick={() => removeIngredient(index)}
-                        className="flex size-3.5 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive sm:size-4"
+                        className="flex size-3 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive sm:size-3.5"
                         aria-label={`Remove ${ingredient}`}
                       >
-                        <X className="size-2.5 sm:size-3" />
+                        <X className="size-2 sm:size-2.5" />
                       </button>
                     </span>
                   ))}
@@ -466,13 +490,13 @@ export default function AnalysisPage() {
               )}
 
               {validationErrors.ingredients && (
-                <p className="mt-1 text-xs text-destructive">{validationErrors.ingredients}</p>
+                <p className="mt-1 text-[10px] text-destructive sm:text-xs">{validationErrors.ingredients}</p>
               )}
             </div>
 
             {/* Intended Use */}
-            <div className="mb-4 sm:mb-6">
-              <label htmlFor="intended-use" className="mb-2 block text-sm font-medium text-foreground">
+            <div className="mb-3 sm:mb-4">
+              <label htmlFor="intended-use" className="mb-1 block text-xs font-medium text-foreground sm:mb-2 sm:text-sm">
                 Intended use <span className="text-destructive">*</span>
               </label>
               <Input
@@ -482,16 +506,16 @@ export default function AnalysisPage() {
                 value={formData.intendedUse}
                 onChange={(e) => setFormData(prev => ({ ...prev, intendedUse: e.target.value }))}
                 aria-required="true"
-                className="text-sm"
+                className="text-xs sm:text-sm"
               />
               {validationErrors.intendedUse && (
-                <p className="mt-1 text-xs text-destructive">{validationErrors.intendedUse}</p>
+                <p className="mt-1 text-[10px] text-destructive sm:text-xs">{validationErrors.intendedUse}</p>
               )}
             </div>
 
             {/* Preparation / Processing Method */}
-            <div className="mb-4 sm:mb-6">
-              <label htmlFor="preparation-process" className="mb-2 block text-sm font-medium text-foreground">
+            <div className="mb-3 sm:mb-4">
+              <label htmlFor="preparation-process" className="mb-1 block text-xs font-medium text-foreground sm:mb-2 sm:text-sm">
                 Preparation / processing method
               </label>
               <div className="relative">
@@ -500,32 +524,39 @@ export default function AnalysisPage() {
                   placeholder="Describe how it is prepared or processed, such as extraction, heating, fermentation, drying, or mixing."
                   value={formData.preparationProcess}
                   onChange={(e) => setFormData(prev => ({ ...prev, preparationProcess: e.target.value }))}
-                  rows={3}
-                  className="pr-10 text-sm sm:pr-12 sm:rows-4"
+                  rows={2}
+                  className="pr-8 text-xs sm:pr-10 sm:rows-3 sm:text-sm"
                 />
-                <button
-                  type="button"
-                  onClick={() => toggleVoiceRecording('preparationProcess')}
-                  disabled={!isSpeechSupported}
-                  className={`absolute bottom-2.5 right-2.5 flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-muted sm:bottom-3 sm:right-3 sm:size-8 ${
-                    voiceState === 'listening' && activeVoiceField === 'preparationProcess'
-                      ? 'text-red-500 animate-pulse'
-                      : 'text-muted-foreground'
-                  } ${!isSpeechSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  aria-label="Voice input for preparation method"
-                >
-                  {voiceState === 'listening' && activeVoiceField === 'preparationProcess' ? (
-                    <MicOff className="size-3.5 sm:size-4" />
-                  ) : (
-                    <Mic className="size-3.5 sm:size-4" />
+                <div className="absolute bottom-2 right-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleVoiceRecording('preparationProcess')}
+                    disabled={!isSpeechSupported}
+                    className={`flex size-6 items-center justify-center rounded-lg transition-colors hover:bg-muted sm:size-7 ${
+                      voiceState === 'listening' && activeVoiceField === 'preparationProcess'
+                        ? 'text-red-500 animate-pulse'
+                        : 'text-muted-foreground'
+                    } ${!isSpeechSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    aria-label="Voice input for preparation method"
+                  >
+                    {voiceState === 'listening' && activeVoiceField === 'preparationProcess' ? (
+                      <MicOff className="size-3 sm:size-3.5" />
+                    ) : (
+                      <Mic className="size-3 sm:size-3.5" />
+                    )}
+                  </button>
+                  {!isSpeechSupported && (
+                    <div className="absolute bottom-full right-0 mb-2 whitespace-nowrap rounded-lg bg-background border border-border px-2 py-1 text-[10px] shadow-lg">
+                      Use Chrome/Edge/Safari
+                    </div>
                   )}
-                </button>
+                </div>
               </div>
             </div>
 
             {/* Traditional or Community Use */}
-            <div className="mb-4 sm:mb-6">
-              <label htmlFor="traditional-use" className="mb-2 block text-sm font-medium text-foreground">
+            <div className="mb-3 sm:mb-4">
+              <label htmlFor="traditional-use" className="mb-1 block text-xs font-medium text-foreground sm:mb-2 sm:text-sm">
                 Traditional or community use (optional)
               </label>
               <div className="relative">
@@ -534,53 +565,71 @@ export default function AnalysisPage() {
                   placeholder="Describe any known traditional use, community use, region, textual reference, or documented practice."
                   value={formData.traditionalUse}
                   onChange={(e) => setFormData(prev => ({ ...prev, traditionalUse: e.target.value }))}
-                  rows={3}
-                  className="pr-10 text-sm sm:pr-12 sm:rows-4"
+                  rows={2}
+                  className="pr-8 text-xs sm:pr-10 sm:rows-3 sm:text-sm"
                 />
-                <button
-                  type="button"
-                  onClick={() => toggleVoiceRecording('traditionalUse')}
-                  disabled={!isSpeechSupported}
-                  className={`absolute bottom-2.5 right-2.5 flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-muted sm:bottom-3 sm:right-3 sm:size-8 ${
-                    voiceState === 'listening' && activeVoiceField === 'traditionalUse'
-                      ? 'text-red-500 animate-pulse'
-                      : 'text-muted-foreground'
-                  } ${!isSpeechSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  aria-label="Voice input for traditional use"
-                >
-                  {voiceState === 'listening' && activeVoiceField === 'traditionalUse' ? (
-                    <MicOff className="size-3.5 sm:size-4" />
-                  ) : (
-                    <Mic className="size-3.5 sm:size-4" />
+                <div className="absolute bottom-2 right-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleVoiceRecording('traditionalUse')}
+                    disabled={!isSpeechSupported}
+                    className={`flex size-6 items-center justify-center rounded-lg transition-colors hover:bg-muted sm:size-7 ${
+                      voiceState === 'listening' && activeVoiceField === 'traditionalUse'
+                        ? 'text-red-500 animate-pulse'
+                        : 'text-muted-foreground'
+                    } ${!isSpeechSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    aria-label="Voice input for traditional use"
+                  >
+                    {voiceState === 'listening' && activeVoiceField === 'traditionalUse' ? (
+                      <MicOff className="size-3 sm:size-3.5" />
+                    ) : (
+                      <Mic className="size-3 sm:size-3.5" />
+                    )}
+                  </button>
+                  {!isSpeechSupported && (
+                    <div className="absolute bottom-full right-0 mb-2 whitespace-nowrap rounded-lg bg-background border border-border px-2 py-1 text-[10px] shadow-lg">
+                      Use Chrome/Edge/Safari
+                    </div>
                   )}
-                </button>
+                </div>
               </div>
-              <p className="mt-2 text-[10px] text-muted-foreground sm:text-xs">
+              <p className="mt-1.5 text-[9px] text-muted-foreground sm:mt-2 sm:text-[10px]">
                 Only share information that you are permitted to disclose.
               </p>
             </div>
 
             {/* Voice Error */}
             {voiceError && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive sm:mb-6">
-                <AlertCircle className="size-4" />
-                <span className="text-xs sm:text-sm">{voiceError}</span>
+              <div className="mb-3 flex items-center gap-2 rounded-lg bg-destructive/10 px-2.5 py-1.5 text-xs text-destructive sm:mb-4 sm:px-3 sm:py-2 sm:text-sm">
+                <AlertCircle className="size-3 sm:size-4" />
+                <span className="text-[10px] sm:text-xs">{voiceError}</span>
                 <button
                   type="button"
                   onClick={() => setVoiceError(null)}
                   className="ml-auto text-destructive/70 hover:text-destructive"
                 >
-                  <X className="size-3" />
+                  <X className="size-2.5 sm:size-3" />
                 </button>
               </div>
             )}
 
+            {/* API Error */}
+            {apiError && (
+              <div className="mb-3">
+                <ErrorDisplay
+                  error={apiError}
+                  onDismiss={() => setApiError(null)}
+                  showRetry={false}
+                />
+              </div>
+            )}
+
             {/* Attachment */}
-            <div className="mb-4 sm:mb-6">
-              <label className="mb-2 block text-sm font-medium text-foreground">
+            <div className="mb-3 sm:mb-4">
+              <label className="mb-1 block text-xs font-medium text-foreground sm:mb-2 sm:text-sm">
                 Attachment (optional)
               </label>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -592,38 +641,38 @@ export default function AnalysisPage() {
                   type="button"
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  className="gap-2 w-full sm:w-auto"
+                  className="gap-1.5 w-full text-xs sm:gap-2 sm:w-auto sm:text-sm"
                   size="sm"
                 >
-                  <Paperclip className="size-3.5 sm:size-4" />
+                  <Paperclip className="size-3 sm:size-3.5" />
                   <span>Attach file</span>
                 </Button>
 
                 {formData.attachment && (
-                  <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
-                    <span className="text-xs text-foreground truncate sm:text-sm">{formData.attachment.name}</span>
+                  <div className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/30 px-2.5 py-1.5 sm:gap-2 sm:px-3 sm:py-2">
+                    <span className="text-[10px] text-foreground truncate sm:text-xs">{formData.attachment.name}</span>
                     <button
                       type="button"
                       onClick={removeAttachment}
-                      className="flex size-4 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive sm:size-5"
+                      className="flex size-3.5 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive sm:size-4"
                       aria-label="Remove attachment"
                     >
-                      <X className="size-2.5 sm:size-3" />
+                      <X className="size-2 sm:size-2.5" />
                     </button>
                   </div>
                 )}
               </div>
               {validationErrors.attachment && (
-                <p className="mt-1 text-xs text-destructive">{validationErrors.attachment}</p>
+                <p className="mt-1 text-[10px] text-destructive sm:text-xs">{validationErrors.attachment}</p>
               )}
-              <p className="mt-2 text-[10px] text-muted-foreground sm:text-xs">
+              <p className="mt-1.5 text-[9px] text-muted-foreground sm:mt-2 sm:text-[10px]">
                 Supported formats: PDF, DOC, DOCX, TXT (max 10MB)
               </p>
             </div>
 
             {/* Privacy Note */}
-            <div className="mb-4 rounded-lg bg-muted/30 px-3 py-2.5 sm:mb-6 sm:px-4 sm:py-3">
-              <p className="text-[10px] text-muted-foreground sm:text-xs">
+            <div className="mb-3 rounded-lg bg-muted/30 px-2.5 py-2 sm:mb-4 sm:px-3 sm:py-2.5">
+              <p className="text-[9px] text-muted-foreground sm:text-[10px]">
                 Privacy-first processing. Avoid sharing confidential information unless necessary.
               </p>
             </div>
@@ -650,16 +699,14 @@ export default function AnalysisPage() {
               )}
             </Button>
 
-            {validationErrors.submit && (
-              <p className="mt-2 text-center text-xs text-destructive sm:text-sm">{validationErrors.submit}</p>
-            )}
+
 
             {/* Example Section */}
-            <div className="mt-6 border-t border-border/40 pt-4 sm:mt-8 sm:pt-6">
-              <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground sm:mb-3 sm:text-xs">
+            <div className="mt-4 border-t border-border/40 pt-3 sm:mt-6 sm:pt-4">
+              <p className="mb-1.5 text-[9px] font-medium uppercase tracking-wider text-muted-foreground sm:mb-2 sm:text-[10px]">
                 Example
               </p>
-              <p className="mb-2 text-xs text-muted-foreground sm:mb-3 sm:text-sm">
+              <p className="mb-1.5 text-[10px] text-muted-foreground sm:mb-2 sm:text-xs">
                 Neem and turmeric based Ayurvedic formulation for skin care
               </p>
               <Button
@@ -667,7 +714,7 @@ export default function AnalysisPage() {
                 variant="ghost"
                 size="sm"
                 onClick={useExample}
-                className="text-primary"
+                className="text-primary text-xs sm:text-sm"
               >
                 Use example
               </Button>
