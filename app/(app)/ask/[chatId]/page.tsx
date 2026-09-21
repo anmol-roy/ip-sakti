@@ -27,6 +27,7 @@ import { useI18n } from '@/components/providers/i18n-provider'
 import { Button } from '@/components/ui/button'
 import { ErrorDisplay } from '@/components/ui/error-display'
 import { apiClient, APIError, AskResponse, FormulationAnalysisResponse } from '@/lib/api-client'
+import ReactMarkdown from 'react-markdown'
 
 const MAX_CHARS = 2000
 const LANGUAGES = [
@@ -163,7 +164,10 @@ export default function ChatPage() {
   const [chatTitle, setChatTitle] = useState('IP Research Chat')
   const [apiError, setApiError] = useState<string | null>(null)
   const [isInitialized, setIsInitialized] = useState(false)
-  
+  const [streamingAnswer, setStreamingAnswer] = useState('')
+  const [currentStep, setCurrentStep] = useState<string | null>(null)
+  const [isStreaming, setIsStreaming] = useState(false)
+
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const recognitionRef = useRef<any>(null)
   const isRecordingRef = useRef(false)
@@ -564,7 +568,7 @@ export default function ChatPage() {
   const handleFollowUpSubmit = useCallback(async () => {
     const q = followUp.trim()
     if (!q) return
-    
+
     // Add user message
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -575,32 +579,74 @@ export default function ChatPage() {
     setMessages(prev => [...prev, userMessage])
     setFollowUp('')
     setLoadingState('loading')
-    
+    setIsStreaming(true)
+    setStreamingAnswer('')
+    setCurrentStep(null)
+
+    // Create a placeholder AI message for streaming
+    const aiResponseId = `ai-${Date.now()}`
+    const placeholderMessage: Message = {
+      id: aiResponseId,
+      role: 'assistant',
+      content: '',
+      response: {
+        preliminaryFinding: '',
+        explanation: '',
+        relevantAreas: [],
+        evidence: [],
+        confidence: 'Low'
+      },
+      createdAt: new Date()
+    }
+    setMessages(prev => [...prev, placeholderMessage])
+
     try {
-      // Call backend API
-      const backendResponse = await apiClient.ask({ query: q })
-      const aiResponseId = `ai-${Date.now()}`
-      const aiResponse: Message = {
-        id: aiResponseId,
-        role: 'assistant',
-        content: '',
-        response: mapAskResponseToAIResponse(backendResponse),
-        createdAt: new Date()
-      }
-      
-      // Prevent duplicate messages by checking if we already have this response
-      setMessages(prev => {
-        if (prev.some(msg => msg.id === aiResponseId)) {
-          console.warn('Prevented duplicate message with id:', aiResponseId)
-          return prev
+      // Call backend streaming API
+      await apiClient.askStream(
+        { query: q },
+        (chunk) => {
+          // Handle streaming chunks
+          if (chunk.type === 'step') {
+            setCurrentStep(chunk.message)
+          } else if (chunk.type === 'answer_chunk') {
+            setStreamingAnswer(prev => prev + chunk.content)
+          } else if (chunk.type === 'language_detected') {
+            // Update language info if needed
+          } else if (chunk.type === 'scope_result') {
+            // Update scope info if needed
+          } else if (chunk.type === 'jurisdiction_result') {
+            // Update jurisdiction info if needed
+          }
+        },
+        (response) => {
+          // Handle completion
+          const aiResponse: Message = {
+            id: aiResponseId,
+            role: 'assistant',
+            content: '',
+            response: mapAskResponseToAIResponse(response),
+            createdAt: new Date()
+          }
+          setMessages(prev => prev.map(msg => msg.id === aiResponseId ? aiResponse : msg))
+          setIsStreaming(false)
+          setStreamingAnswer('')
+          setCurrentStep(null)
+          setApiError(null)
+
+          if (!response.sufficient) {
+            setLoadingState('insufficient')
+          }
+        },
+        (error) => {
+          // Handle error
+          console.error('Streaming error:', error)
+          setApiError(error.message || 'Failed to process your question. Please try again.')
+          setLoadingState('error')
+          setIsStreaming(false)
+          setStreamingAnswer('')
+          setCurrentStep(null)
         }
-        return [...prev, aiResponse]
-      })
-      setApiError(null)
-      
-      if (!backendResponse.sufficient) {
-        setLoadingState('insufficient')
-      }
+      )
     } catch (error) {
       console.error('Follow-up query error:', error)
       if (error instanceof APIError) {
@@ -609,10 +655,11 @@ export default function ChatPage() {
         setApiError('Failed to process your question. Please try again.')
       }
       setLoadingState('error')
-    } finally {
-      setLoadingState('idle')
+      setIsStreaming(false)
+      setStreamingAnswer('')
+      setCurrentStep(null)
     }
-    
+
     // Scroll to bottom
     setTimeout(() => {
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
@@ -762,11 +809,11 @@ export default function ChatPage() {
 
               {/* AI Message */}
               {message.role === 'assistant' && message.response && (
-                <div className="space-y-6">
+                <div className="space-y-6 w-full">
                   {/* Response Header */}
                   <div className="flex items-center gap-2">
                     <Sparkles className="size-4 text-primary" />
-                    <span 
+                    <span
                       className="text-sm font-semibold text-foreground"
                       title={formatExactTime(message.createdAt)}
                     >
@@ -774,21 +821,36 @@ export default function ChatPage() {
                     </span>
                   </div>
 
+                  {/* Streaming Progress Indicator */}
+                  {isStreaming && message.id === messages[messages.length - 1]?.id && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Loader2 className="size-3 animate-spin" />
+                      <span>{currentStep || 'Processing...'}</span>
+                    </div>
+                  )}
+
                   {/* Document-like response using typography hierarchy */}
-                  <div className="space-y-6">
+                  <div className="space-y-6 w-full">
                     {/* Preliminary Finding */}
                     <div>
                       <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         PRELIMINARY FINDING
                       </p>
                       <h2 className="text-xl font-semibold text-foreground">
-                        {message.response.preliminaryFinding}
+                        {message.response.preliminaryFinding || (isStreaming && 'Analyzing your query...')}
                       </h2>
                     </div>
 
                     {/* Explanation */}
                     <div className="text-sm leading-relaxed text-foreground prose prose-sm max-w-none">
-                      {message.response.explanation}
+                      {isStreaming && message.id === messages[messages.length - 1]?.id ? (
+                        <div>
+                          <ReactMarkdown>{streamingAnswer || message.response.explanation}</ReactMarkdown>
+                          <span className="inline-block w-2 h-4 ml-1 bg-primary animate-pulse" />
+                        </div>
+                      ) : (
+                        <ReactMarkdown>{message.response.explanation}</ReactMarkdown>
+                      )}
                     </div>
 
                     {/* Formulation Classification */}

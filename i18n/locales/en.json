@@ -1,12 +1,12 @@
 {
   "app": {
-    "name": "AnvashAI",
-    "fullName": "AnvashAI",
+    "name": "AnveshAI",
+    "fullName": "AnveshAI",
     "tagline": "Intellectual property research assistant"
   },
   "nav": {
     "home": "Home",
-    "ask": "Ask AnvashAI",
+    "ask": "Ask AnveshAI",
     "chats": "My Chats",
     "analysis": "Analysis",
     "sources": "Sources",
@@ -34,10 +34,10 @@
   "pages": {
     "home": {
       "title": "Home",
-      "description": "The AnvashAI landing experience will introduce the assistant, its evidence-first research approach, and how it supports Ayurveda and intellectual property guidance."
+      "description": "The AnveshAI landing experience will introduce the assistant, its evidence-first research approach, and how it supports Ayurveda and intellectual property guidance."
     },
     "ask": {
-      "title": "Ask AnvashAI",
+      "title": "Ask AnveshAI",
       "description": "A jurisdiction-aware research workspace where you can ask intellectual property questions and receive evidence-backed, source-cited answers."
     },
     "chats": {
@@ -50,7 +50,7 @@
     },
     "sources": {
       "title": "Sources",
-      "description": "The authoritative source library listing the documents and resources AnvashAI uses as evidence."
+      "description": "The authoritative source library listing the documents and resources AnveshAI uses as evidence."
     },
     "review": {
       "title": "Human Review",
@@ -103,10 +103,10 @@
     "and": "and"
   },
   "auth": {
-    "signInTitle": "Sign in to AnvashAI",
+    "signInTitle": "Sign in to AnveshAI",
     "signInSubtitle": "Access your intellectual property research workspace",
     "signUpTitle": "Create your account",
-    "signUpSubtitle": "Start evidence-first IP research with AnvashAI",
+    "signUpSubtitle": "Start evidence-first IP research with AnveshAI",
     "backHome": "Back to home"
   },
   "home": {
@@ -114,13 +114,13 @@
       "eyebrow": "AI-powered IP research",
       "titleLine1": "Intellectual Property Research,",
       "titleLine2": "Grounded in Evidence.",
-      "body": "AnvashAI helps innovators and researchers navigate patents, traditional knowledge, formulations, ABS and IP regulations using source-grounded AI.",
-      "ctaAsk": "Ask AnvashAI",
+      "body": "AnveshAI helps innovators and researchers navigate patents, traditional knowledge, formulations, ABS and IP regulations using source-grounded AI.",
+      "ctaAsk": "Ask AnveshAI",
       "ctaHow": "Explore how it works",
       "pillSource": "Source-backed",
       "pillEvidence": "Evidence-first",
       "pillReview": "Human review when needed",
-      "disclaimer": "Information provided by AnvashAI is for research and informational purposes and does not constitute legal advice.",
+      "disclaimer": "Information provided by AnveshAI is for research and informational purposes and does not constitute legal advice.",
       "visualQuestion": "Question",
       "visualResearch": "Research",
       "visualEvidence": "Evidence",
@@ -150,8 +150,8 @@
         "answer": "Answer"
       },
       "panel": {
-        "ariaLabel": "AnvashAI research interface preview",
-        "title": "AnvashAI",
+        "ariaLabel": "AnveshAI research interface preview",
+        "title": "AnveshAI",
         "tagline": "Research · Evidence · Impact",
         "placeholder": "Ask a question about patents, traditional knowledge, formulations or IP regulations...",
         "region": "India",
@@ -226,11 +226,11 @@
       }
     },
     "how": {
-      "heading": "How AnvashAI works",
+      "heading": "How AnveshAI works",
       "step1Title": "Ask",
       "step1Body": "Describe your invention, formulation or IP question.",
       "step2Title": "Understand",
-      "step2Body": "AnvashAI identifies language, jurisdiction, IP type and relevant research areas.",
+      "step2Body": "AnveshAI identifies language, jurisdiction, IP type and relevant research areas.",
       "step3Title": "Investigate",
       "step3Body": "Relevant legal, patent, traditional knowledge and regulatory sources are searched.",
       "step4Title": "Evidence",
@@ -238,7 +238,7 @@
     },
     "investigation": {
       "heading": "See the research behind the answer",
-      "body": "AnvashAI makes its research process visible so users can understand which areas were considered and which sources contributed to an answer.",
+      "body": "AnveshAI makes its research process visible so users can understand which areas were considered and which sources contributed to an answer.",
       "title": "AI Investigation",
       "exampleNote": "Visual example of research metadata. This is not a live result.",
       "language": "Language detected",
@@ -286,10 +286,10 @@
       "heading": "Built for grounded IP research",
       "user": "User",
       "userDesc": "The user begins with a question, issue, or research objective in their own context.",
-      "interface": "AnvashAI interface",
+      "interface": "AnveshAI interface",
       "interfaceDesc": "A guided interface turns the user need into a structured IP research workflow.",
       "understanding": "Query understanding",
-      "understandingDesc": "AnvashAI clarifies the problem, the legal domain, and the likely research angle.",
+      "understandingDesc": "AnveshAI clarifies the problem, the legal domain, and the likely research angle.",
       "context": "Jurisdiction + IP type + language",
       "contextDesc": "The system identifies jurisdiction, IP category, and language before searching for evidence.",
       "orchestrator": "AI orchestrator",
@@ -318,7 +318,7 @@
       "noteHumanDesc": "Complex questions can move to human review when professional judgment is needed."
     },
     "demo": {
-      "heading": "See AnvashAI in action",
+      "heading": "See AnveshAI in action",
       "body": "Explore how a question moves from research intent to an evidence-backed answer.",
       "label": "Product walkthrough",
       "play": "Play",
@@ -340,7 +340,7 @@
     },
     "multilingual": {
       "heading": "Research across languages",
-      "body": "AnvashAI is designed to support multilingual interaction using language technologies and national language infrastructure such as Bhashini.",
+      "body": "AnveshAI is designed to support multilingual interaction using language technologies and national language infrastructure such as Bhashini.",
       "bhashini": "Designed to leverage language infrastructure such as Bhashini. This integration is not live yet.",
       "uiTitle": "Application UI",
       "uiBody": "i18n",
@@ -359,7 +359,7 @@
       "traceTitle": "Traceable",
       "traceBody": "Important information can be connected to supporting evidence.",
       "safeTitle": "Safe uncertainty",
-      "safeBody": "When evidence is insufficient, AnvashAI can recommend further review rather than presenting unsupported conclusions.",
+      "safeBody": "When evidence is insufficient, AnveshAI can recommend further review rather than presenting unsupported conclusions.",
       "humanTitle": "Human escalation",
       "humanBody": "Users can request review from an IP facilitator."
     },
@@ -370,14 +370,14 @@
       "cta": "Request Human Review"
     },
     "final": {
-      "heading": "Start your IP research with AnvashAI.",
+      "heading": "Start your IP research with AnveshAI.",
       "body": "Ask a question, explore the evidence and understand where your research needs a closer look.",
-      "ctaAsk": "Ask AnvashAI",
+      "ctaAsk": "Ask AnveshAI",
       "ctaSources": "Explore Sources"
     },
     "ask": {
-      "accentLine": "Ask AnvashAI",
-      "heading": "Ask AnvashAI",
+      "accentLine": "Ask AnveshAI",
+      "heading": "Ask AnveshAI",
       "subheading": "A jurisdiction-aware research workspace where you can ask intellectual property questions and receive evidence-backed, source-cited answers.",
       "placeholder": "Ask your IP question or describe your invention, formulation, or concern...",
       "charCount": "{{count}}/2000",
@@ -407,8 +407,8 @@
       "privacy": "Privacy",
       "terms": "Terms",
       "disclaimer": "Disclaimer",
-      "copyright": "© AnvashAI",
-      "legalNote": "Information provided by AnvashAI is for research and informational purposes and does not constitute legal advice.",
+      "copyright": "© AnveshAI",
+      "legalNote": "Information provided by AnveshAI is for research and informational purposes and does not constitute legal advice.",
       "privacyBody": "The full privacy policy will be published with the production release.",
       "termsBody": "The terms of use will be published with the production release."
     }
@@ -417,7 +417,7 @@
     "title": "IP Research Chat",
     "session": "Session",
     "updated": "Updated",
-    "backToAsk": "Back to Ask AnvashAI",
+    "backToAsk": "Back to Ask AnveshAI",
     "followUpPlaceholder": "Ask a follow-up...",
     "voiceError": "Microphone access denied. Please allow microphone access.",
     "voiceErrorGeneral": "Error: {{error}}",
@@ -436,15 +436,15 @@
     "copy": "Copy",
     "copied": "Copied",
     "requestReview": "Request facilitator review",
-    "sahayak": "AnvashAI",
-    "researching": "AnvashAI is researching...",
+    "sahayak": "AnveshAI",
+    "researching": "AnveshAI is researching...",
     "unableToGenerate": "Unable to generate the response right now.",
     "tryAgain": "Please try again.",
     "evidenceInsufficient": "Evidence insufficient",
     "evidenceInsufficientBody": "The available sources do not provide enough evidence to answer this question reliably.",
     "viewSources": "View available sources",
     "askSpecific": "Ask a more specific question",
-    "disclaimer": "AnvashAI provides source-grounded informational assistance and does not constitute legal advice."
+    "disclaimer": "AnveshAI provides source-grounded informational assistance and does not constitute legal advice."
   },
   "formulation": {
     "title": "Formulation Workspace",
@@ -485,7 +485,7 @@
   "resources": {
     "eyebrow": "KNOWLEDGE LIBRARY",
     "title": "Resources",
-    "description": "Explore the laws, guidelines, treaties, databases, and reference documents used by AnvashAI to provide source-grounded IP research assistance.",
+    "description": "Explore the laws, guidelines, treaties, databases, and reference documents used by AnveshAI to provide source-grounded IP research assistance.",
     "searchPlaceholder": "Search laws, treaties, databases, or documents...",
     "india": "India",
     "international": "International",
@@ -548,12 +548,12 @@
     "statusCancelled": "Cancelled",
     "submittedOn": "Submitted",
     "returnToChat": "Return to chat",
-    "goToAsk": "Go to Ask AnvashAI",
+    "goToAsk": "Go to Ask AnveshAI",
     "viewDetails": "View request details",
     "unableToSubmit": "We could not submit your review request. Please try again.",
     "signInRequired": "Please sign in to request facilitator review.",
     "loadingRequest": "Loading request details...",
-    "disclaimer": "Information provided by AnvashAI is for general informational purposes only and does not constitute legal advice."
+    "disclaimer": "Information provided by AnveshAI is for general informational purposes only and does not constitute legal advice."
   },
   "chats": {
     "title": "My Chats",

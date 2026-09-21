@@ -435,6 +435,114 @@ class IPSaktiClient {
     })
   }
 
+  // Phase 5: Streaming version of ask
+  async askStream(
+    request: AskRequest,
+    onChunk: (chunk: any) => void,
+    onComplete: (response: AskResponse) => void,
+    onError: (error: Error) => void
+  ): Promise<void> {
+    let lastError: unknown = null
+
+    for (const baseUrl of this.candidateBaseUrls) {
+      const url = `${baseUrl}/ask/stream`
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(request),
+        })
+
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status}`
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.detail || errorMessage
+          } catch {
+            errorMessage = response.statusText || errorMessage
+          }
+          throw new APIError(errorMessage, response.status)
+        }
+
+        this.baseUrl = baseUrl
+
+        // Process the stream
+        const reader = response.body?.getReader()
+        const decoder = new TextDecoder()
+
+        if (!reader) {
+          throw new APIError('Response body is not readable')
+        }
+
+        let buffer = ''
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          buffer += decoder.decode(value, { stream: true })
+
+          // Process complete JSON objects
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || '' // Keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (line.trim()) {
+              try {
+                const data = JSON.parse(line)
+                onChunk(data)
+
+                if (data.type === 'complete') {
+                  onComplete(data as AskResponse)
+                  return
+                }
+
+                if (data.type === 'error') {
+                  onError(new Error(data.error))
+                  return
+                }
+              } catch (e) {
+                console.error('Failed to parse stream chunk:', line, e)
+              }
+            }
+          }
+        }
+
+        return
+      } catch (error) {
+        if (error instanceof APIError) {
+          throw error
+        }
+
+        const isNetworkFailure =
+          error instanceof TypeError &&
+          /fetch|network|Failed to fetch|load failed/i.test(error.message)
+
+        const isConnectionFailure =
+          typeof error === 'object' &&
+          error !== null &&
+          'name' in error &&
+          (error.name === 'TypeError' || error.name === 'AbortError')
+
+        if (!(isNetworkFailure || isConnectionFailure)) {
+          throw new APIError('An unexpected error occurred')
+        }
+
+        lastError = error
+      }
+    }
+
+    throw new APIError(
+      'Network error: Unable to connect to the backend server',
+      undefined,
+      lastError
+    )
+  }
+
   // Phase 7: Formulation Analysis
   async analyzeFormulation(request: FormulationAnalysisRequest): Promise<FormulationAnalysisResponse> {
     return this.request<FormulationAnalysisResponse>('/analyze-formulation', {

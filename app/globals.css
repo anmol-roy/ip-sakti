@@ -276,7 +276,11 @@
 /* Prose styling for markdown content */
 .prose {
   color: var(--foreground);
-  max-width: 65ch;
+  max-width: 100%;
+}
+
+.prose-sm {
+  max-width: 100% !important;
 }
 
 .prose p {
