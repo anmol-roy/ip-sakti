@@ -1,6 +1,7 @@
 'use client'
 
 import { Menu, PanelLeft } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Brand } from '@/components/layout/brand'
@@ -18,6 +19,19 @@ export function Header({
   onOpenMobile: () => void
 }) {
   const { t } = useI18n()
+  const pathname = usePathname()
+
+  const getPageTitle = () => {
+    if (pathname === '/') return 'Home'
+    if (pathname === '/ask') return 'Ask'
+    if (pathname.startsWith('/ask/')) return 'Chat'
+    if (pathname === '/analysis') return 'Analysis'
+    if (pathname === '/chats') return 'My Chats'
+    if (pathname === '/review') return 'Review'
+    if (pathname === '/sources') return 'Sources'
+    if (pathname.startsWith('/sources/')) return 'Source Details'
+    return 'Anvashai'
+  }
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background px-3 md:px-4">
@@ -45,6 +59,10 @@ export function Header({
       <div className="md:hidden">
         <Brand showText />
       </div>
+
+      <h1 className="hidden md:block text-sm font-semibold text-foreground">
+        {getPageTitle()}
+      </h1>
 
       <div className="flex-1" />
 

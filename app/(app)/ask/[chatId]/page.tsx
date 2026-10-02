@@ -163,15 +163,14 @@ export default function ChatPage() {
   const [showFormulationDetails, setShowFormulationDetails] = useState(false)
   const [chatTitle, setChatTitle] = useState('IP Research Chat')
   const [apiError, setApiError] = useState<string | null>(null)
-  const [isInitialized, setIsInitialized] = useState(false)
-  const [streamingAnswer, setStreamingAnswer] = useState('')
-  const [currentStep, setCurrentStep] = useState<string | null>(null)
-  const [isStreaming, setIsStreaming] = useState(false)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const recognitionRef = useRef<any>(null)
   const isRecordingRef = useRef(false)
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null)
+  // Effects can be replayed in development and during Fast Refresh.  Keep the
+  // guard outside state so a second effect cannot start the same API request.
+  const initializedChatRef = useRef<string | null>(null)
   
   // Map backend AskResponse to frontend AIResponse format
   const mapAskResponseToAIResponse = (backendResponse: AskResponse): AIResponse => {
@@ -283,8 +282,9 @@ export default function ChatPage() {
   // Initialize conversation from sessionStorage
   useEffect(() => {
     const initializeChat = async () => {
-      // Prevent duplicate initialization
-      if (isInitialized) return
+      // Prevent duplicate initialization before any asynchronous work starts.
+      if (!chatId || initializedChatRef.current === chatId) return
+      initializedChatRef.current = chatId
       
       try {
         const storedQuestion = sessionStorage.getItem(`chat:${chatId}:q`)
@@ -324,7 +324,6 @@ export default function ChatPage() {
               // Prevent duplicate messages
               setMessages(prev => {
                 if (prev.some(msg => msg.id === 'initial-response')) {
-                  console.warn('Prevented duplicate initial-response')
                   return prev
                 }
                 return [...prev, aiResponse]
@@ -366,7 +365,6 @@ export default function ChatPage() {
               // Prevent duplicate messages
               setMessages(prev => {
                 if (prev.some(msg => msg.id === 'initial-response')) {
-                  console.warn('Prevented duplicate initial-response')
                   return prev
                 }
                 return [...prev, aiResponse]
@@ -391,13 +389,11 @@ export default function ChatPage() {
       } catch (error) {
         console.error('Chat initialization error:', error)
         setMessages([])
-      } finally {
-        setIsInitialized(true)
       }
     }
     
     initializeChat()
-  }, [chatId, isInitialized])
+  }, [chatId])
 
   // Update current time periodically for relative timestamps
   useEffect(() => {
@@ -579,74 +575,27 @@ export default function ChatPage() {
     setMessages(prev => [...prev, userMessage])
     setFollowUp('')
     setLoadingState('loading')
-    setIsStreaming(true)
-    setStreamingAnswer('')
-    setCurrentStep(null)
-
-    // Create a placeholder AI message for streaming
-    const aiResponseId = `ai-${Date.now()}`
-    const placeholderMessage: Message = {
-      id: aiResponseId,
-      role: 'assistant',
-      content: '',
-      response: {
-        preliminaryFinding: '',
-        explanation: '',
-        relevantAreas: [],
-        evidence: [],
-        confidence: 'Low'
-      },
-      createdAt: new Date()
-    }
-    setMessages(prev => [...prev, placeholderMessage])
 
     try {
-      // Call backend streaming API
-      await apiClient.askStream(
-        { query: q },
-        (chunk) => {
-          // Handle streaming chunks
-          if (chunk.type === 'step') {
-            setCurrentStep(chunk.message)
-          } else if (chunk.type === 'answer_chunk') {
-            setStreamingAnswer(prev => prev + chunk.content)
-          } else if (chunk.type === 'language_detected') {
-            // Update language info if needed
-          } else if (chunk.type === 'scope_result') {
-            // Update scope info if needed
-          } else if (chunk.type === 'jurisdiction_result') {
-            // Update jurisdiction info if needed
-          }
-        },
-        (response) => {
-          // Handle completion
-          const aiResponse: Message = {
-            id: aiResponseId,
-            role: 'assistant',
-            content: '',
-            response: mapAskResponseToAIResponse(response),
-            createdAt: new Date()
-          }
-          setMessages(prev => prev.map(msg => msg.id === aiResponseId ? aiResponse : msg))
-          setIsStreaming(false)
-          setStreamingAnswer('')
-          setCurrentStep(null)
-          setApiError(null)
+      // Call backend API
+      const response = await apiClient.ask({ query: q })
+      
+      const aiMessage: Message = {
+        id: `ai-${Date.now()}`,
+        role: 'assistant',
+        content: '',
+        response: mapAskResponseToAIResponse(response),
+        createdAt: new Date()
+      }
+      
+      setMessages(prev => [...prev, aiMessage])
+      setApiError(null)
 
-          if (!response.sufficient) {
-            setLoadingState('insufficient')
-          }
-        },
-        (error) => {
-          // Handle error
-          console.error('Streaming error:', error)
-          setApiError(error.message || 'Failed to process your question. Please try again.')
-          setLoadingState('error')
-          setIsStreaming(false)
-          setStreamingAnswer('')
-          setCurrentStep(null)
-        }
-      )
+      if (!response.sufficient) {
+        setLoadingState('insufficient')
+      } else {
+        setLoadingState('idle')
+      }
     } catch (error) {
       console.error('Follow-up query error:', error)
       if (error instanceof APIError) {
@@ -655,9 +604,6 @@ export default function ChatPage() {
         setApiError('Failed to process your question. Please try again.')
       }
       setLoadingState('error')
-      setIsStreaming(false)
-      setStreamingAnswer('')
-      setCurrentStep(null)
     }
 
     // Scroll to bottom
@@ -821,14 +767,6 @@ export default function ChatPage() {
                     </span>
                   </div>
 
-                  {/* Streaming Progress Indicator */}
-                  {isStreaming && message.id === messages[messages.length - 1]?.id && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Loader2 className="size-3 animate-spin" />
-                      <span>{currentStep || 'Processing...'}</span>
-                    </div>
-                  )}
-
                   {/* Document-like response using typography hierarchy */}
                   <div className="space-y-6 w-full">
                     {/* Preliminary Finding */}
@@ -837,20 +775,13 @@ export default function ChatPage() {
                         PRELIMINARY FINDING
                       </p>
                       <h2 className="text-xl font-semibold text-foreground">
-                        {message.response.preliminaryFinding || (isStreaming && 'Analyzing your query...')}
+                        {message.response.preliminaryFinding}
                       </h2>
                     </div>
 
                     {/* Explanation */}
                     <div className="text-sm leading-relaxed text-foreground prose prose-sm max-w-none">
-                      {isStreaming && message.id === messages[messages.length - 1]?.id ? (
-                        <div>
-                          <ReactMarkdown>{streamingAnswer || message.response.explanation}</ReactMarkdown>
-                          <span className="inline-block w-2 h-4 ml-1 bg-primary animate-pulse" />
-                        </div>
-                      ) : (
-                        <ReactMarkdown>{message.response.explanation}</ReactMarkdown>
-                      )}
+                      <ReactMarkdown>{message.response.explanation}</ReactMarkdown>
                     </div>
 
                     {/* Formulation Classification */}
