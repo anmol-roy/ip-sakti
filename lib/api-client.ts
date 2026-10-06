@@ -25,7 +25,14 @@ function getCandidateBaseUrls(configuredUrl?: string): string[] {
   return Array.from(uniqueUrls)
 }
 
-const API_BASE_URL = getCandidateBaseUrls(process.env.NEXT_PUBLIC_API_BASE_URL)[0] ?? 'http://localhost:8000'
+const API_BASE_URL = (() => {
+  const configured = process.env.NEXT_PUBLIC_API_BASE_URL
+  const candidateUrls = getCandidateBaseUrls(configured)
+  console.log('[API Client] NEXT_PUBLIC_API_BASE_URL:', configured)
+  console.log('[API Client] Candidate URLs:', candidateUrls)
+  console.log('[API Client] Using URL:', candidateUrls[0] ?? 'http://localhost:8000')
+  return candidateUrls[0] ?? 'http://localhost:8000'
+})()
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types matching backend Pydantic models
