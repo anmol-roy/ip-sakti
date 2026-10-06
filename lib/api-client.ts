@@ -465,93 +465,103 @@ class IPSaktiClient {
     onComplete: (response: AskResponse) => void,
     onError: (error: Error) => void
   ): Promise<void> {
-    const url = `${this.baseUrl}/ask`
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    }
+    let lastError: unknown = null
 
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(request),
-      })
+    for (const baseUrl of this.candidateBaseUrls) {
+      const url = `${baseUrl}/ask`
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
 
-      if (!response.ok) {
-        let errorMessage = `HTTP ${response.status}`
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.detail || errorMessage
-        } catch {
-          errorMessage = response.statusText || errorMessage
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(request),
+        })
+
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status}`
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.detail || errorMessage
+          } catch {
+            errorMessage = response.statusText || errorMessage
+          }
+          const error = new APIError(errorMessage, response.status)
+          lastError = error
+          continue // Try next URL
         }
-        throw new APIError(errorMessage, response.status)
-      }
 
-      // Process the stream
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
+        // Process the stream
+        const reader = response.body?.getReader()
+        const decoder = new TextDecoder()
 
-      if (!reader) {
-        throw new APIError('Response body is not readable')
-      }
+        if (!reader) {
+          throw new APIError('Response body is not readable')
+        }
 
-      let buffer = ''
+        let buffer = ''
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
 
-        buffer += decoder.decode(value, { stream: true })
+          buffer += decoder.decode(value, { stream: true })
 
-        // Process complete JSON objects
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || '' // Keep incomplete line in buffer
+          // Process complete JSON objects
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || '' // Keep incomplete line in buffer
 
-        for (const line of lines) {
-          if (line.trim()) {
-            try {
-              const data = JSON.parse(line)
-              onChunk(data)
+          for (const line of lines) {
+            if (line.trim()) {
+              try {
+                const data = JSON.parse(line)
+                onChunk(data)
 
-              if (data.type === 'complete') {
-                onComplete(data as AskResponse)
-                return
+                if (data.type === 'complete') {
+                  this.baseUrl = baseUrl
+                  onComplete(data as AskResponse)
+                  return
+                }
+
+                if (data.type === 'error') {
+                  onError(new Error(data.error))
+                  return
+                }
+              } catch (e) {
+                console.error('Failed to parse stream chunk:', line, e)
               }
-
-              if (data.type === 'error') {
-                onError(new Error(data.error))
-                return
-              }
-            } catch (e) {
-              console.error('Failed to parse stream chunk:', line, e)
             }
           }
         }
+
+        this.baseUrl = baseUrl
+        return
+      } catch (error) {
+        const isNetworkFailure =
+          error instanceof TypeError &&
+          /fetch|network|Failed to fetch|load failed/i.test(error.message)
+
+        const isConnectionFailure =
+          typeof error === 'object' &&
+          error !== null &&
+          'name' in error &&
+          (error.name === 'TypeError' || error.name === 'AbortError')
+
+        if (!(isNetworkFailure || isConnectionFailure)) {
+          throw new APIError('An unexpected error occurred')
+        }
+
+        lastError = error
       }
-
-      return
-    } catch (error) {
-      if (error instanceof APIError) {
-        throw error
-      }
-
-      const isNetworkFailure =
-        error instanceof TypeError &&
-        /fetch|network|Failed to fetch|load failed/i.test(error.message)
-
-      const isConnectionFailure =
-        typeof error === 'object' &&
-        error !== null &&
-        'name' in error &&
-        (error.name === 'TypeError' || error.name === 'AbortError')
-
-      if (isNetworkFailure || isConnectionFailure) {
-        throw new APIError('Network error: Unable to connect to the backend server')
-      }
-
-      throw new APIError('An unexpected error occurred')
     }
+
+    throw new APIError(
+      'Network error: Unable to connect to the backend server',
+      undefined,
+      lastError
+    )
   }
 }
 
